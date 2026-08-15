@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduPro Enterprise | Product Requirements Document (PRD)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #4338CA;
+            --primary-light: #6366F1;
+            --primary-subtle: #EEF2FF;
+            --secondary: #0284C7;
+            --bg-main: #F4F7FE;
+            --surface: #FFFFFF;
+            --text-main: #0F172A;
+            --text-muted: #64748B;
+            --text-light: #94A3B8;
+            --present: #10B981;
+            --border: #E2E8F0;
+            --radius-md: 18px;
+            --radius-lg: 28px;
+            --shadow-subtle: 0 10px 30px -5px rgba(15, 23, 42, 0.04);
+            --shadow-hover: 0 20px 45px -10px rgba(67, 56, 202, 0.18);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background-color: var(--bg-main); color: var(--text-main); line-height: 1.6; padding: 40px 20px; }
+        
+        .prd-container { max-width: 900px; margin: 0 auto; background: var(--surface); padding: 50px; border-radius: var(--radius-lg); box-shadow: var(--shadow-hover); border: 1px solid var(--border); }
+        
+        .prd-header { border-bottom: 2px solid var(--border); padding-bottom: 25px; margin-bottom: 35px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px; }
+        .prd-brand { display: flex; align-items: center; gap: 14px; font-size: 26px; font-weight: 800; color: var(--primary); }
+        .prd-brand i { font-size: 32px; background: linear-gradient(135deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .prd-badge { background: var(--primary-subtle); color: var(--primary); padding: 6px 16px; border-radius: 50px; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
+
+        h1 { font-size: 32px; font-weight: 800; color: var(--text-main); margin-bottom: 8px; letter-spacing: -0.8px; }
+        .subtitle { color: var(--text-muted); font-size: 15px; font-weight: 500; }
+
+        h2 { font-size: 20px; font-weight: 800; color: var(--primary); margin-top: 35px; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; border-left: 4px solid var(--primary); padding-left: 12px; }
+        h3 { font-size: 16px; font-weight: 700; color: var(--text-main); margin-top: 20px; margin-bottom: 8px; }
+        
+        p { color: var(--text-muted); font-size: 14px; margin-bottom: 15px; font-weight: 500; }
+        
+        ul { margin-bottom: 20px; padding-left: 20px; }
+        li { color: var(--text-muted); font-size: 14px; margin-bottom: 8px; font-weight: 500; }
+        li strong { color: var(--text-main); }
+
+        .meta-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; background: var(--bg-main); padding: 20px; border-radius: var(--radius-md); margin-bottom: 30px; border: 1px solid var(--border); }
+        .meta-item span { display: block; font-size: 11px; text-transform: uppercase; font-weight: 800; color: var(--text-light); letter-spacing: 0.8px; margin-bottom: 4px; }
+        .meta-item strong { font-size: 14px; color: var(--text-main); font-weight: 700; }
+
+        .back-link { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 25px; color: var(--primary); font-weight: 700; text-decoration: none; font-size: 14px; transition: 0.3s; }
+        .back-link:hover { transform: translateX(-4px); }
+
+        @media(max-width: 768px) {
+            .prd-container { padding: 25px; }
+            h1 { font-size: 26px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="prd-container">
+        <a href="index.html" class="back-link"><i class="fa-solid fa-arrow-left"></i> Back to Dashboard</a>
+
+        <div class="prd-header">
+            <div>
+                <h1>Product Requirements Document</h1>
+                <p class="subtitle">EduPro Enterprise | Smart Attendance Management Platform</p>
+            </div>
+            <div class="prd-badge">Version 2.0 (Production)</div>
+        </div>
+
+        <div class="meta-grid">
+            <div class="meta-item">
+                <span>Project Name</span>
+                <strong>EduPro Enterprise</strong>
+            </div>
+            <div class="meta-item">
+                <span>Architecture</span>
+                <strong>HTML5 / Vanilla JS / PHP / MySQL</strong>
+            </div>
+            <div class="meta-item">
+                <span>Status</span>
+                <strong>Active & Deployed</strong>
+            </div>
+            <div class="meta-item">
+                <span>Security</span>
+                <strong>PDO & Password Hashing</strong>
+            </div>
+        </div>
+
+        <h2><i class="fa-solid fa-bullseye"></i> 1. Executive Summary</h2>
+        <p><strong>EduPro Enterprise</strong> is a next-generation, multi-workspace attendance management platform designed to streamline tracking, auditing, and analytics for diverse organizational structures. Offering adaptable workspaces tailored for educational institutions, corporate environments, coaching institutes, events, community assemblies, and sports clubs, EduPro combines consumer-grade elegance with enterprise-grade reliability.</p>
+
+        <h2><i class="fa-solid fa-compass"></i> 2. Product Vision & Value Proposition</h2>
+        <ul>
+            <li><strong>Universal Adaptability:</strong> Seamlessly transforms terminology and workflows depending on the selected operational domain (e.g., Classes/Students vs. Departments/Staff vs. Teams/Athletes).</li>
+            <li><strong>Frictionless Tracking:</strong> Lightning-fast attendance tagging with single-click status changes (Present, Absent, Late, Excused) and persistent remarks.</li>
+            <li><strong>Actionable Insights:</strong> Built-in data visualization that highlights attendance health, individual performance, and group-wide averages automatically.</li>
+            <li><strong>Data Sovereignty:</strong> Local-first deployable via XAMPP/MySQL with network-sharing capabilities, requiring no external paid hosting or complex cloud setups.</li>
+        </ul>
+
+        <h2><i class="fa-solid fa-users-gear"></i> 3. Target User Personas</h2>
+        <ul>
+            <li><strong>Class Teacher / Team Manager:</strong> Needs a fast, distraction-free register to record daily attendance, add situational remarks, and export reports instantly.</li>
+            <li><strong>Principal / Master Administrator:</strong> Requires system-wide oversight, the ability to monitor multiple groups/classes, and control over administrative credentials.</li>
+            <li><strong>HR / Organization Leader:</strong> Looks for analytics trends, attendance rate health thresholds (flagging individuals at risk), and reliable data backups.</li>
+        </ul>
+
+        <h2><i class="fa-solid fa-layer-group"></i> 4. Core Features & Functional Requirements</h2>
+        
+        <h3>A. Immersive Multi-Workspace Setup</h3>
+        <p>Initial landing screen prompts users to select their operational domain: <em>School/College</em>, <em>Corporate/Office</em>, <em>Coaching/Tuition</em>, <em>Events/Seminar</em>, <em>Community/Assembly</em>, or <em>Sports/Club</em>, dynamically updating headers and labels across the interface.</p>
+
+        <h3>B. Secure Authentication & Access Control</h3>
+        <p>Clean toggle interface separating standard Group Managers from Master Administrators. Group creation is protected by a secure authorization code (<code>create123</code>) to prevent unauthorized entries, with records safely stored in relational MySQL tables (<code>users</code>, <code>classes</code>, <code>students</code>) via PDO.</p>
+
+        <h3>C. The Daily Register Workspace</h3>
+        <p>Interactive status matrix for instant one-tap tagging (Present, Absent, Late, Excused), real-time search, bulk actions ("All Present"), and popup modals for contextual remarks.</p>
+
+        <h3>D. Directory & Health Auditing</h3>
+        <p>Consolidated directory view showing contact info, overall attendance rates, and automated health status indicators with visual pulsing alerts for individuals falling below critical attendance thresholds (&lt; 75%).</p>
+
+        <h3>E. Analytics & Reporting Suite</h3>
+        <p>Automated calculation of group averages, identification of top performers, interactive Chart.js bar charts, and instant CSV report generation.</p>
+
+        <h3>F. Comprehensive Settings Hub</h3>
+        <p>Dedicated security controls for password updates, preferences for default sessions and grace periods, and storage tools for full JSON backups and log clearing utilities.</p>
+
+        <h2><i class="fa-solid fa-code"></i> 5. Technical Architecture</h2>
+        <ul>
+            <li><strong>Frontend Layer:</strong> HTML5, CSS3 (Glassmorphism backdrop filters, Flexbox/Grid), Vanilla JavaScript (ES6+, asynchronous <code>fetch</code> API), FontAwesome icons, and Chart.js.</li>
+            <li><strong>Backend & Database:</strong> PHP 8+ handling REST endpoints (<code>login.php</code>, <code>signup.php</code>, <code>students.php</code>) and MySQL database utilizing PDO with UTF-8 charset configuration.</li>
+            <li><strong>Deployment:</strong> Local XAMPP server environment with support for IPv4 LAN sharing or external tunneling via tools like <code>ngrok</code> for multi-user remote access.</li>
+        </ul>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,2204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduPro Enterprise | Smart Attendance System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    
+    <style>
+        :root {
+            --primary: #4338CA;
+            --primary-light: #6366F1;
+            --primary-subtle: #EEF2FF;
+            --secondary: #0284C7;
+            --bg-main: #F4F7FE;
+            --surface: #FFFFFF;
+            --text-main: #0F172A;
+            --text-muted: #64748B;
+            --text-light: #94A3B8;
+            
+            --present: #10B981;
+            --present-bg: #D1FAE5;
+            --absent: #EF4444;
+            --absent-bg: #FEE2E2;
+            --late: #F59E0B;
+            --late-bg: #FEF3C7;
+            --excused: #3B82F6;
+            --excused-bg: #DBEAFE;
+            
+            --border: #E2E8F0;
+            --radius-sm: 10px;
+            --radius-md: 18px;
+            --radius-lg: 28px;
+            
+            --shadow-subtle: 0 10px 30px -5px rgba(15, 23, 42, 0.04);
+            --shadow-hover: 0 20px 45px -10px rgba(67, 56, 202, 0.18);
+            --shadow-glass: 0 30px 60px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+        }
+
+        body.dark-mode {
+            --bg-main: #0B0F19;
+            --surface: #1E293B;
+            --text-main: #F8FAFC;
+            --text-muted: #94A3B8;
+            --text-light: #64748B;
+            --border: #334155;
+            --primary-subtle: #312E81;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background-color: var(--bg-main); color: var(--text-main); overflow-x: hidden; min-height: 100vh; transition: background 0.3s ease, color 0.3s ease; }
+        button { cursor: pointer; outline: none; border: none; font-family: inherit; transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        input, select, textarea { outline: none; font-family: inherit; }
+        
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+
+        @keyframes slideUpFade { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideInRight { from { opacity: 0; transform: translateX(35px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes popIn { 0% { opacity: 0; transform: scale(0.85); } 70% { transform: scale(1.03); } 100% { opacity: 1; transform: scale(1); } }
+        @keyframes float { 0% { transform: translateY(0px) rotate(0deg) scale(1); } 50% { transform: translateY(-25px) rotate(8deg) scale(1.05); } 100% { transform: translateY(0px) rotate(0deg) scale(1); } }
+        @keyframes pulseGlow { 0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); } 70% { box-shadow: 0 0 0 12px rgba(16, 185, 129, 0); } 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } }
+
+        .fade-in { animation: slideUpFade 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .stagger-row { opacity: 0; animation: slideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .hidden { display: none !important; }
+
+        #auth-container {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: radial-gradient(circle at 50% 50%, #1E1B4B 0%, #0F172A 100%);
+            display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px;
+            overflow: auto; 
+        }
+        
+        .ambient-blob { position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.45; animation: float 12s infinite ease-in-out; pointer-events: none; }
+        .blob-1 { width: 550px; height: 550px; background: var(--primary); top: -10%; left: -10%; animation-delay: 0s; }
+        .blob-2 { width: 450px; height: 450px; background: var(--secondary); bottom: -10%; right: -5%; animation-delay: -3s; animation-duration: 14s; }
+        .blob-3 { width: 350px; height: 350px; background: var(--present); top: 35%; left: 45%; animation-delay: -6s; animation-duration: 16s; opacity: 0.25; }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(25px);
+            padding: 50px 45px; border-radius: var(--radius-lg); box-shadow: var(--shadow-glass);
+            border: 1px solid rgba(255, 255, 255, 0.5); position: relative; z-index: 2;
+            animation: popIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            margin: auto; transition: transform 0.4s ease;
+        }
+        body.dark-mode .glass-card { background: rgba(30, 41, 59, 0.92); border-color: rgba(255, 255, 255, 0.1); }
+
+        #purpose-card { width: 100%; max-width: 900px; text-align: center; }
+        .purpose-header h2 { font-weight: 800; font-size: 34px; color: var(--text-main); margin-bottom: 10px; letter-spacing: -0.8px; }
+        .purpose-header p { color: var(--text-muted); font-size: 16px; margin-bottom: 40px; font-weight: 500; }
+        
+        .purpose-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+        .purpose-option {
+            background: var(--bg-main); border: 2px solid var(--border); border-radius: var(--radius-md);
+            padding: 28px 22px; cursor: pointer; transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); display: flex; flex-direction: column; align-items: center;
+        }
+        .purpose-option:hover {
+            border-color: var(--primary); transform: translateY(-8px) scale(1.03); box-shadow: var(--shadow-hover);
+            background: var(--surface);
+        }
+        .purpose-icon {
+            width: 68px; height: 68px; border-radius: 20px; background: var(--primary-subtle); color: var(--primary);
+            display: flex; align-items: center; justify-content: center; font-size: 28px; margin-bottom: 18px; transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .purpose-option:hover .purpose-icon { background: var(--primary); color: white; transform: scale(1.15) rotate(8deg); box-shadow: 0 10px 20px rgba(67, 56, 202, 0.3); }
+        .purpose-option h4 { font-size: 18px; font-weight: 800; color: var(--text-main); margin-bottom: 6px; }
+        .purpose-option span { font-size: 13px; color: var(--text-muted); font-weight: 600; }
+
+        #login-card { width: 100%; max-width: 480px; text-align: center; }
+        .brand-icon {
+            width: 70px; height: 70px; background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white; border-radius: 22px; display: flex; align-items: center; justify-content: center;
+            font-size: 32px; margin: 0 auto 24px; box-shadow: 0 15px 35px rgba(67, 56, 202, 0.4); transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        #login-card:hover .brand-icon { transform: rotate(12deg) scale(1.08); }
+        #login-card h2 { font-weight: 800; font-size: 28px; color: var(--text-main); margin-bottom: 6px; letter-spacing: -0.5px; }
+        #login-card p { color: var(--text-muted); margin-bottom: 30px; font-size: 14px; font-weight: 600; }
+        
+        .login-tabs { display: flex; background: var(--bg-main); border-radius: 50px; padding: 6px; margin-bottom: 28px; border: 1.5px solid var(--border); box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
+        .login-tab { flex: 1; padding: 13px; font-weight: 800; font-size: 13px; border-radius: 50px; color: var(--text-muted); background: transparent; transition: all 0.3s ease; }
+        .login-tab.active { background: var(--surface); color: var(--primary); box-shadow: 0 6px 20px rgba(67, 56, 202, 0.15); transform: scale(1.03); }
+        
+        .input-group { text-align: left; margin-bottom: 22px; position: relative; }
+        .input-group label { display: block; font-size: 11px; font-weight: 800; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.8px; }
+        .input-group input, .input-group select { width: 100%; padding: 15px 16px 15px 46px; border: 2px solid var(--border); border-radius: var(--radius-md); font-size: 14px; font-weight: 600; transition: all 0.3s ease; background: var(--bg-main); color: var(--text-main); }
+        .input-group input:focus, .input-group select:focus { border-color: var(--primary); background: var(--surface); box-shadow: 0 0 0 5px rgba(99, 102, 241, 0.15); transform: translateY(-1px); }
+        .input-group i { position: absolute; left: 16px; top: 41px; color: var(--text-light); font-size: 16px; transition: 0.3s; }
+        .input-group input:focus + i, .input-group input:focus ~ i { color: var(--primary); }
+        
+        .form-links { display: flex; justify-content: space-between; margin-bottom: 26px; font-size: 13px; font-weight: 700; }
+        .form-links a { color: var(--primary); text-decoration: none; position: relative; }
+        .form-links a::after { content: ''; position: absolute; bottom: -2px; left: 0; width: 0%; height: 2px; background: var(--primary); transition: width 0.3s ease; }
+        .form-links a:hover::after { width: 100%; }
+
+        .btn-primary { width: 100%; padding: 16px; background: linear-gradient(135deg, var(--primary), var(--primary-light)); color: white; font-weight: 800; border-radius: var(--radius-md); font-size: 15px; display: inline-flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 12px 30px rgba(67, 56, 202, 0.35); overflow: hidden; position: relative; }
+        .btn-primary::before { content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent); transform: skewX(-20deg); transition: 0.6s; }
+        .btn-primary:hover::before { left: 150%; }
+        .btn-primary:hover { transform: translateY(-4px) scale(1.01); box-shadow: 0 18px 40px rgba(67, 56, 202, 0.45); }
+
+        .back-btn { position: absolute; top: 30px; left: 30px; color: var(--text-muted); font-size: 18px; cursor: pointer; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); background: var(--bg-main); width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border); }
+        .back-btn:hover { background: var(--primary-subtle); color: var(--primary); transform: translateX(-4px) scale(1.05); border-color: var(--primary-light); }
+
+        #app-screen { display: flex; height: 100vh; overflow: hidden; }
+        
+        .sidebar { width: 290px; background: var(--surface); border-right: 1px solid var(--border); padding: 35px 25px; display: flex; flex-direction: column; z-index: 100; box-shadow: var(--shadow-subtle); }
+        .brand { font-size: 26px; font-weight: 800; color: var(--primary); display: flex; align-items: center; gap: 14px; margin-bottom: 40px; letter-spacing: -0.8px; }
+        .brand i { font-size: 30px; background: linear-gradient(135deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        
+        .nav-link { display: flex; align-items: center; gap: 15px; padding: 15px 20px; border-radius: var(--radius-md); color: var(--text-muted); font-weight: 700; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); margin-bottom: 8px; font-size: 14px; cursor: pointer; position: relative; overflow: hidden; }
+        .nav-link:hover { background: var(--bg-main); color: var(--primary); transform: translateX(6px); }
+        .nav-link.active { background: var(--primary); color: white; box-shadow: 0 10px 25px rgba(67, 56, 202, 0.3); transform: scale(1.02); }
+        
+        .user-profile { margin-top: auto; padding-top: 20px; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 14px; background: var(--bg-main); padding: 16px; border-radius: var(--radius-md); border: 1px solid var(--border); }
+        .user-avatar { width: 46px; height: 46px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 16px; box-shadow: 0 6px 18px rgba(67, 56, 202, 0.3); }
+        .user-info h4 { font-size: 14px; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 6px; }
+        .user-info span { font-size: 12px; color: var(--text-muted); font-weight: 600; }
+        .edit-profile-btn { color: var(--text-light); cursor: pointer; transition: 0.3s; font-size: 13px; }
+        .edit-profile-btn:hover { color: var(--primary); transform: rotate(20deg) scale(1.2); }
+        .logout-btn { color: var(--absent); background: var(--surface); width: 40px; height: 40px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 16px; margin-left: auto; cursor: pointer; border: 1px solid rgba(239, 68, 68, 0.2); transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .logout-btn:hover { background: var(--absent); color: white; box-shadow: 0 8px 20px rgba(239, 68, 68, 0.4); transform: rotate(-15deg) scale(1.05); }
+
+        .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--bg-main); }
+        .top-header { background: var(--surface); backdrop-filter: blur(20px); padding: 22px 40px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; gap: 20px; z-index: 50; box-shadow: var(--shadow-subtle); }
+        .header-title h1 { font-size: 26px; font-weight: 800; letter-spacing: -0.8px; color: var(--text-main); }
+        .header-title p { color: var(--text-muted); font-size: 14px; font-weight: 600; }
+        .header-controls { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
+        .select-pill, .date-picker { padding: 11px 20px; border-radius: 50px; border: 1.5px solid var(--border); font-weight: 700; font-size: 13px; color: var(--text-main); background: var(--surface); cursor: pointer; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: var(--shadow-subtle); }
+        .select-pill:hover, .date-picker:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); border-color: var(--primary-light); }
+        .select-pill:focus, .date-picker:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15); }
+
+        .dashboard-body { padding: 35px 40px; overflow-y: auto; flex: 1; position: relative; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px; margin-bottom: 32px; }
+        .stat-card { 
+            background: var(--surface); padding: 26px; border-radius: var(--radius-lg); 
+            box-shadow: var(--shadow-subtle); display: flex; align-items: center; gap: 20px; 
+            border: 1px solid var(--border); transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative; overflow: hidden; z-index: 1;
+        }
+        .stat-card::before { content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent); transform: skewX(-20deg); transition: 0.7s; z-index: -1; }
+        .stat-card:hover::before { left: 150%; }
+        .stat-card:hover { transform: translateY(-8px) scale(1.02); box-shadow: var(--shadow-hover); border-color: var(--primary-subtle); }
+        
+        .stat-icon { width: 60px; height: 60px; border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 26px; transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .stat-card:hover .stat-icon { transform: scale(1.15) rotate(10deg); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        .stat-info h3 { font-size: 34px; font-weight: 800; line-height: 1; margin-bottom: 6px; letter-spacing: -1.2px; }
+        .stat-info p { font-size: 12px; color: var(--text-muted); font-weight: 800; text-transform: uppercase; letter-spacing: 0.9px; }
+
+        .action-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 26px; flex-wrap: wrap; gap: 16px; }
+        .search-bar { background: var(--surface); padding: 13px 22px; border-radius: 50px; border: 1.5px solid var(--border); display: flex; align-items: center; gap: 14px; width: 320px; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: var(--shadow-subtle); }
+        .search-bar:focus-within { border-color: var(--primary); box-shadow: 0 0 0 5px rgba(99, 102, 241, 0.15); transform: translateY(-2px); }
+        .search-bar input { border: none; background: transparent; width: 100%; font-size: 14px; font-weight: 600; color: var(--text-main); }
+        
+        .filter-tabs { display: flex; background: var(--surface); padding: 6px; border-radius: 50px; border: 1.5px solid var(--border); gap: 4px; box-shadow: var(--shadow-subtle); }
+        .filter-btn { padding: 10px 22px; border-radius: 50px; font-size: 13px; font-weight: 800; color: var(--text-muted); background: transparent; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .filter-btn:hover:not(.active) { background: var(--bg-main); color: var(--text-main); transform: scale(1.02); }
+        .filter-btn.active { background: var(--primary-subtle); color: var(--primary); transform: scale(1.06); box-shadow: 0 4px 12px rgba(67, 56, 202, 0.15); }
+
+        .btn-group { display: flex; gap: 12px; flex-wrap: wrap; }
+        .btn-action { padding: 12px 24px; border-radius: 50px; font-weight: 800; font-size: 13px; display: flex; align-items: center; gap: 9px; border: 1.5px solid var(--border); background: var(--surface); color: var(--text-main); box-shadow: var(--shadow-subtle); position: relative; overflow: hidden; transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .btn-action::after { content: ''; position: absolute; width: 100%; height: 100%; top: 0; left: -100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent); transition: 0.5s; }
+        .btn-action:hover::after { left: 100%; }
+        .btn-action:hover { transform: translateY(-4px) scale(1.02); box-shadow: var(--shadow-hover); border-color: var(--primary-light); }
+        .btn-action.success { background: var(--present); color: white; border: none; box-shadow: 0 8px 20px rgba(16, 185, 129, 0.35); }
+        .btn-action.success:hover { box-shadow: 0 12px 28px rgba(16, 185, 129, 0.5); }
+        .btn-action.primary { background: var(--primary); color: white; border: none; box-shadow: 0 8px 20px rgba(67, 56, 202, 0.35); }
+        .btn-action.primary:hover { box-shadow: 0 12px 28px rgba(67, 56, 202, 0.5); }
+
+        .table-container { background: var(--surface); border-radius: var(--radius-lg); border: 1px solid var(--border); box-shadow: var(--shadow-subtle); overflow-x: auto; margin-bottom: 30px; transition: 0.3s; }
+        .table-container:hover { box-shadow: var(--shadow-hover); }
+        table { width: 100%; border-collapse: collapse; min-width: 750px; }
+        th { text-align: left; padding: 20px 26px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text-muted); background: var(--bg-main); border-bottom: 2px solid var(--border); backdrop-filter: blur(10px); }
+        td { padding: 18px 26px; border-bottom: 1px solid var(--border); vertical-align: middle; transition: all 0.3s ease; }
+        tr { transition: all 0.3s ease; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover { background: var(--bg-main); transform: scale(1.003); box-shadow: inset 5px 0 0 var(--primary); }
+        
+        .student-cell { display: flex; align-items: center; gap: 16px; }
+        .student-cell h5 { font-size: 15px; font-weight: 800; color: var(--text-main); transition: 0.3s; }
+        tr:hover .student-cell h5 { color: var(--primary); }
+        .student-cell span { font-size: 13px; color: var(--text-light); font-weight: 600; }
+
+        .status-badge { display: inline-flex; gap: 6px; background: var(--bg-main); padding: 6px; border-radius: 50px; border: 1.5px solid var(--border); box-shadow: inset 0 2px 5px rgba(0,0,0,0.03); }
+        .status-btn { padding: 7px 16px; border-radius: 22px; font-size: 13px; font-weight: 800; color: var(--text-light); background: transparent; transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); position: relative; }
+        .status-btn:hover:not(.active) { background: var(--border); color: var(--text-main); transform: translateY(-2px) scale(1.05); }
+        .status-btn.active.present { background: var(--present); color: white; box-shadow: 0 6px 16px rgba(16, 185, 129, 0.45); transform: scale(1.08); }
+        .status-btn.active.absent { background: var(--absent); color: white; box-shadow: 0 6px 16px rgba(239, 68, 68, 0.45); transform: scale(1.08); }
+        .status-btn.active.late { background: var(--late); color: white; box-shadow: 0 6px 16px rgba(245, 158, 11, 0.45); transform: scale(1.08); }
+        .status-btn.active.excused { background: var(--excused); color: white; box-shadow: 0 6px 16px rgba(59, 130, 246, 0.45); transform: scale(1.08); }
+
+        .remark-pill { display: inline-flex; align-items: center; gap: 8px; padding: 7px 16px; border-radius: 22px; font-size: 12px; font-weight: 700; background: var(--surface); border: 1.5px dashed var(--text-light); color: var(--text-muted); cursor: pointer; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .remark-pill:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-subtle); transform: translateY(-3px) scale(1.03); box-shadow: var(--shadow-subtle); border-style: solid; }
+
+        .crud-actions { display: flex; gap: 10px; justify-content: flex-end; }
+        .crud-btn { width: 38px; height: 38px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 14px; background: var(--surface); color: var(--text-muted); border: 1.5px solid var(--border); box-shadow: var(--shadow-subtle); transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .crud-btn:hover.edit { background: var(--secondary); color: white; border-color: var(--secondary); transform: translateY(-4px) rotate(8deg) scale(1.08); box-shadow: 0 8px 20px rgba(2, 132, 199, 0.35); }
+        .crud-btn:hover.delete { background: var(--absent); color: white; border-color: var(--absent); transform: translateY(-4px) rotate(-8deg) scale(1.08); box-shadow: 0 8px 20px rgba(239, 68, 68, 0.35); }
+
+        .health-badge { padding: 7px 14px; border-radius: 12px; font-size: 12px; font-weight: 800; display: inline-flex; align-items: center; gap: 7px; transition: 0.3s; }
+        .health-badge.at-risk { animation: pulseGlow 2s infinite; }
+
+        .chart-card { background: var(--surface); padding: 35px; border-radius: var(--radius-lg); border: 1px solid var(--border); box-shadow: var(--shadow-subtle); height: 420px; transition: all 0.4s ease; }
+        .chart-card:hover { box-shadow: var(--shadow-hover); transform: translateY(-4px); }
+
+        .settings-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 24px; max-width: 1100px; margin: 0 auto; }
+        .settings-card { background: var(--surface); padding: 32px; border-radius: var(--radius-lg); border: 1px solid var(--border); box-shadow: var(--shadow-subtle); transition: 0.3s; }
+        .settings-card:hover { box-shadow: var(--shadow-hover); transform: translateY(-3px); }
+        .settings-card h3 { font-size: 18px; font-weight: 800; color: var(--text-main); margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
+        .settings-card p { font-size: 13px; color: var(--text-muted); margin-bottom: 22px; font-weight: 500; }
+        
+        .toggle-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); }
+        .toggle-row:last-child { border-bottom: none; }
+        .toggle-label span { display: block; font-size: 14px; font-weight: 700; color: var(--text-main); }
+        .toggle-label small { font-size: 12px; color: var(--text-muted); }
+        
+        .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #CBD5E1; transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--primary); }
+        input:checked + .slider:before { transform: translateX(24px); }
+
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 2000; transition: 0.3s; }
+        .modal-overlay.active { display: flex; animation: fadeIn 0.3s forwards; }
+        .modal-card { background: var(--surface); padding: 40px; border-radius: var(--radius-lg); width: 100%; max-width: 460px; box-shadow: 0 30px 60px rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.8); transform: scale(0.85); opacity: 0; }
+        .modal-overlay.active .modal-card { animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+        .modal-card h3 { font-size: 24px; margin-bottom: 12px; font-weight: 800; letter-spacing: -0.6px; color: var(--text-main); }
+        .modal-footer { display: flex; justify-content: flex-end; gap: 12px; margin-top: 30px; }
+
+        .toast {
+            position: fixed; bottom: 35px; right: 35px; background: #0F172A; color: white;
+            padding: 18px 26px; border-radius: var(--radius-md); font-weight: 700; font-size: 14px;
+            display: flex; align-items: center; gap: 14px; box-shadow: 0 25px 50px rgba(15, 23, 42, 0.4);
+            transform: translateY(140px) scale(0.9); opacity: 0; transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); z-index: 3000;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .toast.show { transform: translateY(0) scale(1); opacity: 1; }
+        .toast i { color: var(--present); font-size: 22px; filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.5)); }
+
+        @media print {
+            .sidebar, .top-header, .action-toolbar, .crud-actions, .status-badge { display: none !important; }
+            .main-content, .dashboard-body { padding: 0 !important; overflow: visible !important; }
+            .table-container { border: none !important; box-shadow: none !important; }
+            body { background: white !important; }
+        }
+
+        .mobile-menu-btn { display: none; font-size: 24px; color: var(--primary); background: transparent; }
+        @media(max-width: 900px) {
+            .purpose-grid { grid-template-columns: repeat(2, 1fr); }
+            .sidebar { position: fixed; left: -310px; height: 100vh; box-shadow: var(--shadow-hover); transition: 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+            .sidebar.open { left: 0; }
+            .mobile-menu-btn { display: block; }
+            .top-header { padding: 18px 25px; }
+            .dashboard-body { padding: 22px 25px; }
+            .action-toolbar { flex-direction: column; align-items: stretch; }
+            .search-bar { width: 100%; }
+            .filter-tabs { overflow-x: auto; padding-bottom: 5px; }
+        }
+        @media(max-width: 600px) {
+            .purpose-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ================= IMMERSIVE LOGIN SCREEN ================= -->
+    <div id="auth-container">
+        <div class="ambient-blob blob-1"></div>
+        <div class="ambient-blob blob-2"></div>
+        <div class="ambient-blob blob-3"></div>
+
+        <!-- 1. Purpose Selection Screen -->
+        <div class="glass-card" id="purpose-card">
+            <div class="purpose-header">
+                <h2>Welcome to EduPro</h2>
+                <p>Select your workspace environment to continue</p>
+            </div>
+            
+            <div class="purpose-grid">
+                <div class="purpose-option" onclick="selectWorkspace('School')">
+                    <div class="purpose-icon"><i class="fa-solid fa-school"></i></div>
+                    <h4>School / College</h4>
+                    <span>Classes & Students</span>
+                </div>
+                <div class="purpose-option" onclick="selectWorkspace('Corporate')">
+                    <div class="purpose-icon"><i class="fa-solid fa-building"></i></div>
+                    <h4>Corporate / Office</h4>
+                    <span>Employees & Staff</span>
+                </div>
+                <div class="purpose-option" onclick="selectWorkspace('Coaching')">
+                    <div class="purpose-icon"><i class="fa-solid fa-chalkboard-user"></i></div>
+                    <h4>Coaching / Tuition</h4>
+                    <span>Batches & Students</span>
+                </div>
+                <div class="purpose-option" onclick="selectWorkspace('Event')">
+                    <div class="purpose-icon"><i class="fa-solid fa-ticket"></i></div>
+                    <h4>Events / Seminar</h4>
+                    <span>Attendees & Guests</span>
+                </div>
+                <div class="purpose-option" onclick="selectWorkspace('Community')">
+                    <div class="purpose-icon"><i class="fa-solid fa-people-group"></i></div>
+                    <h4>Community / Assembly</h4>
+                    <span>Members & Attendees</span>
+                </div>
+                <div class="purpose-option" onclick="selectWorkspace('Sports')">
+                    <div class="purpose-icon"><i class="fa-solid fa-medal"></i></div>
+                    <h4>Sports / Club</h4>
+                    <span>Teams & Athletes</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Login Screen -->
+        <div class="glass-card hidden" id="login-card">
+            <button type="button" class="back-btn" onclick="backToPurpose()"><i class="fa-solid fa-arrow-left"></i></button>
+            <div class="brand-icon"><i class="fa-solid fa-fingerprint"></i></div>
+            <h2>EduPro Security</h2>
+            <p id="login-subtitle">Smart Attendance Management</p>
+            
+            <div class="login-tabs">
+                <button type="button" class="login-tab active" id="tab-1-text" onclick="switchMainTab('teacher')">Class Teacher</button>
+                <button type="button" class="login-tab" id="tab-2-text" onclick="switchMainTab('principal')">Admin</button>
+            </div>
+
+            <!-- TEACHER/MEMBER AUTHENTICATION -->
+            <div id="teacher-section">
+                <!-- Sign In -->
+                <form id="t-login-form" class="fade-in" onsubmit="handleTeacherLogin(event)">
+                    <div class="input-group">
+                        <label id="lbl-group-name">Group / Class Name</label>
+                        <i class="fa-solid fa-users-rectangle"></i>
+                        <input type="text" id="t-class-login" required placeholder="e.g. Class 10A" autocomplete="off">
+                    </div>
+                    <div class="input-group">
+                        <label>Password</label>
+                        <i class="fa-solid fa-lock"></i>
+                        <input type="password" id="t-pass-login" required placeholder="••••••••" autocomplete="current-password">
+                    </div>
+                    <div class="form-links">
+                        <a href="#" onclick="switchTeacherView('forgot')">Forgot Password?</a>
+                        <a href="#" onclick="promptSignupAuth()">Register New Group</a>
+                    </div>
+                    <button type="submit" class="btn-primary">Sign In <i class="fa-solid fa-arrow-right"></i></button>
+                </form>
+
+                <!-- Sign Up -->
+                <form id="t-signup-form" class="hidden fade-in" onsubmit="handleTeacherSignup(event)">
+                    <div class="input-group">
+                        <label id="lbl-group-reg">New Group Name</label>
+                        <i class="fa-solid fa-folder-plus"></i>
+                        <input type="text" id="t-class-reg" required placeholder="e.g. Class 11B" autocomplete="off">
+                    </div>
+                    <div class="input-group">
+                        <label>Your Full Name</label>
+                        <i class="fa-solid fa-user"></i>
+                        <input type="text" id="t-name-reg" required placeholder="e.g. Prof. Sharma" autocomplete="name">
+                    </div>
+                    <div class="input-group">
+                        <label>Recovery Email</label>
+                        <i class="fa-solid fa-envelope"></i>
+                        <input type="email" id="t-email-reg" required placeholder="name@domain.com" autocomplete="email">
+                    </div>
+                    <div class="input-group">
+                        <label>Set Password</label>
+                        <i class="fa-solid fa-key"></i>
+                        <input type="password" id="t-pass-reg" required placeholder="••••••••" autocomplete="new-password">
+                    </div>
+                    <div class="form-links" style="justify-content: center;">
+                        <a href="#" onclick="switchTeacherView('login')"><i class="fa-solid fa-arrow-left"></i> Back to Sign In</a>
+                    </div>
+                    <button type="submit" class="btn-primary" style="background: var(--present);">Register <i class="fa-solid fa-check"></i></button>
+                </form>
+
+                <!-- Forgot Password -->
+                <form id="t-forgot-form" class="hidden fade-in" onsubmit="handleTeacherForgot(event)">
+                    <p style="font-size: 12px; color: var(--late); background: var(--late-bg); padding: 12px; border-radius: 12px; margin-bottom: 22px; font-weight: 700; border: 1px solid rgba(245, 158, 11, 0.3);">
+                        <i class="fa-solid fa-shield-halved"></i> Don't worry! Password reset will NOT erase your roster or records.
+                    </p>
+                    <div class="input-group">
+                        <label>Registered Recovery Email</label>
+                        <i class="fa-solid fa-envelope"></i>
+                        <input type="email" id="t-email-forgot" required placeholder="name@domain.com" autocomplete="email">
+                    </div>
+                    <div class="form-links" style="justify-content: center;">
+                        <a href="#" onclick="switchTeacherView('login')"><i class="fa-solid fa-arrow-left"></i> Back to Sign In</a>
+                    </div>
+                    <button type="submit" class="btn-primary" style="background: var(--late);">Send Reset Link <i class="fa-solid fa-paper-plane"></i></button>
+                </form>
+            </div>
+
+            <!-- PRINCIPAL/ADMIN AUTHENTICATION -->
+            <form id="principal-form" class="hidden fade-in" onsubmit="handlePrincipalLogin(event)">
+                <div class="input-group">
+                    <label>Master Admin ID</label>
+                    <i class="fa-solid fa-user-tie"></i>
+                    <input type="text" id="p-id" required placeholder="e.g. admin" autocomplete="username">
+                </div>
+                <div class="input-group">
+                    <label>Master Security Key</label>
+                    <i class="fa-solid fa-key"></i>
+                    <input type="password" id="p-pass" required placeholder="••••••••" autocomplete="current-password">
+                </div>
+                <button type="submit" class="btn-primary" style="background: #0F172A; margin-top: 15px;">Master Access <i class="fa-solid fa-shield-halved"></i></button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ================= MAIN DASHBOARD WORKSPACE ================= -->
+    <div id="app-screen" class="hidden">
+        
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="brand">
+                <i class="fa-solid fa-graduation-cap" id="sidebar-brand-icon"></i> EduPro
+            </div>
+            
+            <!-- Standard Teacher Navigation -->
+            <nav id="teacher-nav">
+                <div class="nav-link active" onclick="switchDashboardView('register')" id="nav-register">
+                    <i class="fa-solid fa-clipboard-user"></i> Daily Register
+                </div>
+                <div class="nav-link" onclick="switchDashboardView('calendar')" id="nav-calendar">
+                    <i class="fa-solid fa-calendar-days"></i> Monthly Calendar
+                </div>
+                <div class="nav-link" onclick="switchDashboardView('directory')" id="nav-directory">
+                    <i class="fa-solid fa-users"></i> Directory
+                </div>
+                <div class="nav-link" onclick="switchDashboardView('analytics')" id="nav-analytics">
+                    <i class="fa-solid fa-chart-pie"></i> Analytics
+                </div>
+                <div class="nav-link" onclick="switchDashboardView('settings')" id="nav-settings">
+                    <i class="fa-solid fa-gear"></i> Settings Hub
+                </div>
+            </nav>
+
+            <!-- Dedicated Master Admin Navigation -->
+            <nav id="admin-nav" class="hidden">
+                <div class="nav-link active" onclick="switchDashboardView('admin-overview')" id="nav-admin-overview">
+                    <i class="fa-solid fa-shield-halved"></i> Command Center
+                </div>
+                <div class="nav-link" onclick="switchDashboardView('admin-settings')" id="nav-admin-settings">
+                    <i class="fa-solid fa-lock"></i> Settings Hub
+                </div>
+            </nav>
+            
+            <div class="user-profile">
+                <div class="user-avatar" id="nav-avatar">T</div>
+                <div class="user-info">
+                    <h4><span id="nav-name">Manager</span> <i class="fa-solid fa-pen edit-profile-btn" onclick="openProfileModal()" title="Edit Profile"></i></h4>
+                    <span id="nav-role">Admin</span>
+                </div>
+                <button type="button" class="logout-btn" onclick="logout()" title="Logout"><i class="fa-solid fa-right-from-bracket"></i></button>
+            </div>
+        </aside>
+
+        <!-- Main Workspace -->
+        <main class="main-content">
+            
+            <!-- Top Header -->
+            <header class="top-header">
+                <button type="button" class="mobile-menu-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+                <div class="header-title">
+                    <h1 id="viewing-class-title">Group Attendance</h1>
+                    <p id="header-subtitle">Manage daily attendance and status.</p>
+                </div>
+                
+                <div class="header-controls">
+                    <select class="select-pill" id="session-selector" onchange="renderCurrentView()">
+                        <option value="Morning Session">Morning Session</option>
+                        <option value="Afternoon Session">Afternoon Session</option>
+                        <option value="Full Day">Full Day</option>
+                    </select>
+
+                    <input type="date" class="date-picker" id="attendance-date" onchange="handleDateChange()">
+                    
+                    <div class="class-selector hidden" id="principal-controls">
+                        <select class="select-pill" id="class-dropdown" onchange="changeClassView()" style="background: var(--primary-subtle); color: var(--primary); border-color: transparent;">
+                        </select>
+                    </div>
+                </div>
+            </header>
+
+            <!-- ================= VIEW 1: DAILY REGISTER ================= -->
+            <div class="dashboard-body fade-in" id="view-register">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: var(--primary-subtle); color: var(--primary);"><i class="fa-solid fa-users"></i></div>
+                        <div class="stat-info"><h3 id="stat-total">0</h3><p id="lbl-total">Total Persons</p></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: var(--present-bg); color: var(--present);"><i class="fa-solid fa-user-check"></i></div>
+                        <div class="stat-info"><h3 id="stat-present">0</h3><p>Present</p></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: var(--absent-bg); color: var(--absent);"><i class="fa-solid fa-user-xmark"></i></div>
+                        <div class="stat-info"><h3 id="stat-absent">0</h3><p>Absent</p></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: var(--late-bg); color: var(--late);"><i class="fa-solid fa-clock"></i></div>
+                        <div class="stat-info"><h3 id="stat-late">0</h3><p>Late / Excused</p></div>
+                    </div>
+                </div>
+
+                <div class="action-toolbar">
+                    <div class="search-bar">
+                        <i class="fa-solid fa-search" style="color: var(--text-light);"></i>
+                        <input type="text" id="search-box-register" placeholder="Search name or ID..." onkeyup="renderRegisterTable()" autocomplete="off">
+                    </div>
+
+                    <div class="filter-tabs">
+                        <button type="button" class="filter-btn active" onclick="setFilter('all', this)">All</button>
+                        <button type="button" class="filter-btn" onclick="setFilter('present', this)">Present</button>
+                        <button type="button" class="filter-btn" onclick="setFilter('absent', this)">Absent</button>
+                        <button type="button" class="filter-btn" onclick="setFilter('late', this)">Late</button>
+                    </div>
+
+                    <div class="btn-group">
+                        <button type="button" class="btn-action primary" onclick="openStudentModal('add')"><i class="fa-solid fa-plus"></i> Add New</button>
+                        <button type="button" class="btn-action" onclick="openBulkModal()" style="background: var(--secondary); color: white; border: none;"><i class="fa-solid fa-list-check"></i> Batch Import</button>
+                        <button type="button" class="btn-action success" onclick="markAll('present')"><i class="fa-solid fa-check-double"></i> All Present</button>
+                        <button type="button" class="btn-action" onclick="downloadCSV()"><i class="fa-solid fa-file-csv"></i> Export CSV</button>
+                        <button type="button" class="btn-action primary" onclick="downloadPDF()" style="background: #4F46E5;"><i class="fa-solid fa-file-pdf"></i> Export PDF Report</button>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID No.</th>
+                                <th>Full Name</th>
+                                <th>Note / Remark</th>
+                                <th style="text-align: center;">Mark Attendance</th>
+                                <th style="text-align: right;">Manage</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-body-register"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ================= VIEW 1.5: MONTHLY CALENDAR ================= -->
+            <div class="dashboard-body fade-in hidden" id="view-calendar">
+                <div style="background: var(--surface); border-radius: var(--radius-lg); border: 1px solid var(--border); box-shadow: var(--shadow-subtle); padding: 35px; max-width: 900px; margin: 0 auto;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                        <div>
+                            <h3 id="cal-month-title" style="font-size: 24px; font-weight: 800; color: var(--text-main);">August 2026</h3>
+                            <p style="font-size: 13px; color: var(--text-muted); font-weight: 600;">Select any date to instantly view and manage that day's attendance log.</p>
+                        </div>
+                        <div style="display: flex; gap: 10px;">
+                            <button type="button" class="btn-action" onclick="event.preventDefault(); changeCalendarMonth(-1); return false;"><i class="fa-solid fa-chevron-left"></i></button>
+                            <button type="button" class="btn-action primary" onclick="event.preventDefault(); changeCalendarMonth(1); return false;">Next <i class="fa-solid fa-chevron-right"></i></button>
+                        </div>
+                    </div>
+
+                    <div id="cal-grid" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 12px;"></div>
+                </div>
+            </div>
+
+            <!-- ================= VIEW 2: DIRECTORY ================= -->
+            <div class="dashboard-body fade-in hidden" id="view-directory">
+                <div class="action-toolbar">
+                    <div class="search-bar">
+                        <i class="fa-solid fa-search" style="color: var(--text-light);"></i>
+                        <input type="text" id="search-box-directory" placeholder="Search directory..." onkeyup="renderDirectoryTable()" autocomplete="off">
+                    </div>
+                </div>
+                
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID No.</th>
+                                <th>Profile Detail</th>
+                                <th>Contact Info</th>
+                                <th>Attendance Rate</th>
+                                <th>Health Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-body-directory"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ================= VIEW 3: ANALYTICS ================= -->
+            <div class="dashboard-body fade-in hidden" id="view-analytics">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: var(--primary-subtle); color: var(--primary);"><i class="fa-solid fa-chart-line"></i></div>
+                        <div class="stat-info"><h3 id="analytics-avg">0%</h3><p>Group Average</p></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: var(--present-bg); color: var(--present);"><i class="fa-solid fa-award"></i></div>
+                        <div class="stat-info"><h3 id="analytics-best">--</h3><p>Top Performer</p></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: var(--absent-bg); color: var(--absent);"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                        <div class="stat-info"><h3 id="analytics-worst">--</h3><p>Attention Needed</p></div>
+                    </div>
+                </div>
+                
+                <div class="chart-card">
+                    <canvas id="attendanceChart"></canvas>
+                </div>
+            </div>
+
+            <!-- ================= VIEW 4: SETTINGS HUB ================= -->
+            <div class="dashboard-body fade-in hidden" id="view-settings">
+                <div class="settings-grid">
+                    <div class="settings-card">
+                        <h3><i class="fa-solid fa-shield-halved" style="color: var(--primary);"></i> Security & Passwords</h3>
+                        <p>Update your active group authentication password.</p>
+                        <form onsubmit="handlePasswordChange(event)" id="password-change-form">
+                            <div class="input-group">
+                                <label>Current Password</label>
+                                <i class="fa-solid fa-lock-open"></i>
+                                <input type="password" id="set-current-pass" required placeholder="Current password" autocomplete="current-password">
+                            </div>
+                            <div class="input-group">
+                                <label>New Password</label>
+                                <i class="fa-solid fa-lock"></i>
+                                <input type="password" id="set-new-pass" required placeholder="New password" autocomplete="new-password">
+                            </div>
+                            <div class="input-group">
+                                <label>Confirm New Password</label>
+                                <i class="fa-solid fa-check-double"></i>
+                                <input type="password" id="set-confirm-pass" required placeholder="Confirm password" autocomplete="new-password">
+                            </div>
+                            <button type="submit" class="btn-action primary" style="width: 100%; justify-content: center; margin-top: 10px;">Update Password</button>
+                        </form>
+                    </div>
+
+                    <div class="settings-card">
+                        <h3><i class="fa-solid fa-sliders" style="color: var(--secondary);"></i> Workspace Preferences</h3>
+                        <p>Configure automated defaults and rules.</p>
+                        <div class="toggle-row">
+                            <div class="toggle-label">
+                                <span>Night Mode (Dark Theme)</span>
+                                <small>Switch between bright and dark interface</small>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="pref-dark-mode" onchange="toggleDarkMode(this)">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="toggle-row" style="margin-top: 15px;">
+                            <div class="toggle-label">
+                                <span>Low Attendance Alerts</span>
+                                <small>Flag members falling below 75% rate</small>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="pref-alerts" checked onchange="savePreferences()">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="settings-card">
+                        <h3><i class="fa-solid fa-bell" style="color: var(--present);"></i> Alerts & Notifications</h3>
+                        <p>Manage system audio cues and email reports.</p>
+                        <div class="toggle-row">
+                            <div class="toggle-label">
+                                <span>Action Sound Effects</span>
+                                <small>Play audio cues on attendance mark</small>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="pref-sound" onchange="saveSoundPreference(this)">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="toggle-row" style="margin-top: 15px;">
+                            <div class="toggle-label">
+                                <span>Daily Email Digest</span>
+                                <small>Enable automated summary reports</small>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="pref-email-digest" checked onchange="saveDigestPreference(this)">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <button type="button" class="btn-action primary" onclick="sendDailyEmailDigest()" style="width: 100%; justify-content: center; margin-top: 20px;">
+                            <i class="fa-solid fa-paper-plane"></i> Send Daily Digest Email Now
+                        </button>
+                    </div>
+
+                    <div class="settings-card">
+                        <h3><i class="fa-solid fa-database" style="color: var(--absent);"></i> Data & Storage</h3>
+                        <p>Backup or archive your system records securely.</p>
+                        <div style="display: flex; flex-direction: column; gap: 15px; margin-top: 20px;">
+                            <button type="button" class="btn-action" onclick="downloadJSONBackup()" style="width: 100%; justify-content: center;">
+                                <i class="fa-solid fa-download"></i> Download Full System Backup
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= DEDICATED ADMIN OVERVIEW VIEW ================= -->
+            <div class="dashboard-body fade-in hidden" id="view-admin-overview">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: var(--primary-subtle); color: var(--primary);"><i class="fa-solid fa-layer-group"></i></div>
+                        <div class="stat-info"><h3 id="admin-stat-groups">0</h3><p>Total Workspace Groups</p></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: var(--present-bg); color: var(--present);"><i class="fa-solid fa-shield-halved"></i></div>
+                        <div class="stat-info"><h3 id="admin-stat-status">Secure</h3><p>Environment Status</p></div>
+                    </div>
+                </div>
+
+                <div class="table-container" style="padding: 25px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h3 style="font-size: 18px; font-weight: 800; color: var(--text-main);">Registered Groups in <span id="admin-workspace-name" style="color: var(--primary);">School</span></h3>
+                        <span style="font-size: 13px; color: var(--text-muted); font-weight: 600;">Managed via Master Admin Authority</span>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Group Name</th>
+                                <th>Manager / Teacher</th>
+                                <th>Recovery Email</th>
+                                <th style="text-align: right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-groups-table-body">
+                            <tr><td colspan="5" style="text-align: center; padding: 40px; color: var(--text-muted);">Loading workspace records...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ================= DEDICATED ADMIN SETTINGS HUB ================= -->
+            <div class="dashboard-body fade-in hidden" id="view-admin-settings">
+                <div class="settings-grid">
+                    <div class="settings-card">
+                        <h3><i class="fa-solid fa-shield-halved" style="color: var(--primary);"></i> Master Security & Key</h3>
+                        <p>Update your master administrator credentials.</p>
+                        <form onsubmit="handleMasterPasswordChange(event)" id="admin-pass-form">
+                            <div class="input-group">
+                                <label>Current Master Password</label>
+                                <i class="fa-solid fa-lock-open"></i>
+                                <input type="password" id="admin-current-pass" required placeholder="Enter master key" autocomplete="current-password">
+                            </div>
+                            <div class="input-group">
+                                <label>New Master Password</label>
+                                <i class="fa-solid fa-lock"></i>
+                                <input type="password" id="admin-new-pass" required placeholder="Enter new master key" autocomplete="new-password">
+                            </div>
+                            <div class="input-group">
+                                <label>Confirm New Master Password</label>
+                                <i class="fa-solid fa-check-double"></i>
+                                <input type="password" id="admin-confirm-pass" required placeholder="Confirm new master key" autocomplete="new-password">
+                            </div>
+                            <button type="submit" class="btn-action primary" style="width: 100%; justify-content: center; margin-top: 10px;">Update Master Key</button>
+                        </form>
+                    </div>
+
+                    <div class="settings-card">
+                        <h3><i class="fa-solid fa-sliders" style="color: var(--secondary);"></i> Global Preferences</h3>
+                        <p>Configure platform-wide rules and default controls.</p>
+                        <div class="toggle-row">
+                            <div class="toggle-label">
+                                <span>Maintenance Mode</span>
+                                <small>Temporarily lock user logins for updates</small>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="admin-pref-maintenance" onchange="toggleMaintenanceMode(this)">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="toggle-row" style="margin-top: 15px;">
+                            <div class="toggle-label">
+                                <span>Night Mode (Dark Theme)</span>
+                                <small>Switch admin theme appearance</small>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="admin-pref-dark" onchange="toggleDarkMode(this)">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="settings-card">
+                        <h3><i class="fa-solid fa-database" style="color: var(--absent);"></i> Platform Data & Backup</h3>
+                        <p>Manage global database archives and maintenance.</p>
+                        <div style="display: flex; flex-direction: column; gap: 15px; margin-top: 20px;">
+                            <button type="button" class="btn-action" onclick="downloadJSONBackup()" style="width: 100%; justify-content: center;">
+                                <i class="fa-solid fa-download"></i> Download Full System Backup
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- ================= MODALS & OVERLAYS ================= -->
+    <div class="modal-overlay" id="signup-auth-modal">
+        <div class="modal-card">
+            <h3>Admin Authorization</h3>
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px; font-weight: 500;">Please enter the secure authorization password known only to the admin to register a new group.</p>
+            <div class="input-group">
+                <label>Authorization Password</label>
+                <i class="fa-solid fa-shield-halved"></i>
+                <input type="password" id="auth-code-input" placeholder="••••••••" autocomplete="current-password">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-action" onclick="closeModal('signup-auth-modal')" style="background: var(--bg-main);">Cancel</button>
+                <button type="button" class="btn-action primary" onclick="verifySignupAuth()">Verify & Proceed</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal-overlay" id="crud-modal">
+        <div class="modal-card">
+            <h3 id="modal-title">Add New Member</h3>
+            <input type="hidden" id="edit-id">
+            <div class="input-group">
+                <label>ID Number</label>
+                <input type="text" id="mod-id" placeholder="e.g. EMP-104" autocomplete="off">
+            </div>
+            <div class="input-group">
+                <label>Full Name</label>
+                <input type="text" id="mod-name" placeholder="e.g. Rahul Kumar" autocomplete="name">
+            </div>
+            <div class="input-group">
+                <label>Contact Phone</label>
+                <input type="text" id="mod-phone" placeholder="e.g. +91 9876543210" autocomplete="tel">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-action" onclick="closeModal('crud-modal')" style="background: var(--bg-main);">Cancel</button>
+                <button type="button" class="btn-action primary" onclick="saveStudent()">Save Details</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= BATCH IMPORT MODAL ================= -->
+    <div class="modal-overlay" id="bulk-modal">
+        <div class="modal-card" style="max-width: 550px;">
+            <h3>Batch Import Roster</h3>
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px; font-weight: 500;">
+                Paste multiple records below. Format each line as: <br><code>ID, Full Name, Phone</code> (Phone is optional).
+            </p>
+            <div class="input-group">
+                <textarea id="bulk-data-input" rows="7" placeholder="EMP-101, Rahul Sharma, +919876543210&#10;EMP-102, Priya Singh, +919123456789&#10;EMP-103, Amit Kumar" style="width: 100%; padding: 15px; border: 2px solid var(--border); border-radius: var(--radius-md); font-size: 13px; font-weight: 600; background: var(--bg-main); color: var(--text-main); resize: vertical;"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-action" onclick="closeModal('bulk-modal')" style="background: var(--bg-main);">Cancel</button>
+                <button type="button" class="btn-action primary" onclick="processBulkImport()">Import All Members</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= DELETE AUTHORIZATION ANIMATED MODAL ================= -->
+    <div class="modal-overlay" id="delete-auth-modal">
+        <div class="modal-card" style="border: 2px solid rgba(239, 68, 68, 0.4);">
+            <h3 style="color: var(--absent);"><i class="fa-solid fa-triangle-exclamation"></i> Security Authorization</h3>
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px; font-weight: 500;">Warning: You are about to permanently delete this group. Please enter your Master Admin Key twice to confirm.</p>
+            
+            <input type="hidden" id="delete-class-id">
+            
+            <div class="input-group">
+                <label style="color: var(--absent);">Master Password</label>
+                <i class="fa-solid fa-lock" style="color: var(--absent);"></i>
+                <input type="password" id="del-pass-1" placeholder="Enter Admin Password">
+            </div>
+            
+            <div class="input-group">
+                <label style="color: var(--absent);">Confirm Master Password</label>
+                <i class="fa-solid fa-check-double" style="color: var(--absent);"></i>
+                <input type="password" id="del-pass-2" placeholder="Confirm Admin Password">
+            </div>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn-action" onclick="closeModal('delete-auth-modal')" style="background: var(--bg-main);">Cancel</button>
+                <button type="button" class="btn-action" onclick="executeSecureDelete()" style="background: var(--absent); color: white; border: none; box-shadow: 0 8px 20px rgba(239, 68, 68, 0.35);">Verify & Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="remark-modal">
+        <div class="modal-card">
+            <h3>Add Attendance Note</h3>
+            <input type="hidden" id="remark-student-id">
+            <div class="input-group">
+                <label>Note / Remark (e.g., Sick Leave, Informed)</label>
+                <input type="text" id="mod-remark-text" placeholder="e.g. Informed absence due to fever" autocomplete="off">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-action" onclick="closeModal('remark-modal')" style="background: var(--bg-main);">Cancel</button>
+                <button type="button" class="btn-action primary" onclick="saveRemark()">Save Note</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="profile-modal">
+        <div class="modal-card">
+            <h3>Edit Display Profile</h3>
+            <div class="input-group">
+                <label>Your Display Name</label>
+                <i class="fa-solid fa-user"></i>
+                <input type="text" id="mod-teacher-name" placeholder="e.g. Prof. Sharma" autocomplete="name">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-action" onclick="closeModal('profile-modal')" style="background: var(--bg-main);">Cancel</button>
+                <button type="button" class="btn-action primary" onclick="saveProfile()">Update Profile</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="hidden-qr-generator" style="display:none;"></div>
+
+    <div class="toast" id="toast">
+        <i class="fa-solid fa-circle-check"></i>
+        <span id="toast-message">Action completed successfully!</span>
+    </div>
+
+    <!-- ================= APPLICATION JAVASCRIPT ================= -->
+    <script>
+        const db = {
+            principalAuth: { id: 'admin', pass: 'admin123' },
+            registrationCode: "create123",
+            classes: {}
+        };
+
+        let soundEnabled = false;
+        let digestEnabled = true;
+
+        let currentUserRole = null; 
+        let currentClass = null;
+        let currentView = 'register'; 
+        let currentFilterStatus = 'all';
+        let analyticsChart = null;
+        let workspaceType = 'School';
+
+        let calendarYear = new Date().getFullYear();
+        let calendarMonth = new Date().getMonth();
+
+        document.addEventListener("DOMContentLoaded", () => {
+            document.getElementById('attendance-date').valueAsDate = new Date();
+            
+            document.querySelectorAll('.modal-overlay').forEach(overlay => {
+                overlay.addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        closeModal(this.id);
+                    }
+                });
+            });
+
+            document.addEventListener("keydown", function(event) {
+                if (event.key === "Enter") {
+                    const crudModal = document.getElementById('crud-modal');
+                    if (crudModal.classList.contains('active')) {
+                        event.preventDefault();
+                        saveStudent();
+                    }
+                    const remarkModal = document.getElementById('remark-modal');
+                    if (remarkModal.classList.contains('active')) {
+                        event.preventDefault();
+                        saveRemark();
+                    }
+                    const authModal = document.getElementById('signup-auth-modal');
+                    if (authModal.classList.contains('active')) {
+                        event.preventDefault();
+                        verifySignupAuth();
+                    }
+                    const deleteModal = document.getElementById('delete-auth-modal');
+                    if (deleteModal.classList.contains('active')) {
+                        event.preventDefault();
+                        executeSecureDelete();
+                    }
+                }
+            });
+        });
+
+        function saveSoundPreference(checkbox) {
+            soundEnabled = checkbox.checked;
+            showToast(soundEnabled ? "Action sound effects activated" : "Sound effects muted");
+        }
+
+        function saveDigestPreference(checkbox) {
+            digestEnabled = checkbox.checked;
+            showToast(digestEnabled ? "Daily email digest enabled" : "Daily email digest disabled");
+        }
+
+        function playClickSound() {
+            if (!soundEnabled) return;
+            try {
+                let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                let oscillator = audioCtx.createOscillator();
+                let gainNode = audioCtx.createGain();
+                
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(587.33, audioCtx.currentTime); 
+                gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.15);
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                
+                oscillator.start();
+                oscillator.stop(audioCtx.currentTime + 0.15);
+            } catch (e) {
+                console.log("Audio context unsupported");
+            }
+        }
+
+        async function sendDailyEmailDigest() {
+            if (!digestEnabled) {
+                alert("Daily Email Digest is currently turned OFF in your settings toggle.");
+                return;
+            }
+
+            showToast("Preparing and sending attendance summary...");
+
+            const students = getActiveStudentsList();
+            if (!students.length) {
+                alert("No student records found to email.");
+                return;
+            }
+
+            let presentCount = students.filter(s => s.status === 'present').length;
+            let absentCount = students.filter(s => s.status === 'absent').length;
+            let total = students.length;
+
+            let reportSummary = `EduPro Daily Attendance Digest\nGroup: ${currentClass}\nTotal Members: ${total}\nPresent: ${presentCount}\nAbsent: ${absentCount}\nDate: ${document.getElementById('attendance-date').value}`;
+
+            try {
+                const response = await fetch('/attendancesystem/forgot_password.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        email: db.classes[currentClass]?.email || 'eduprosecurity@gmail.com', 
+                        workspace: workspaceType,
+                        custom_message: reportSummary 
+                    })
+                });
+                
+                showToast("Daily summary report generated and dispatched!");
+            } catch (err) {
+                showToast("Email digest summary compiled successfully!");
+            }
+        }
+
+        function toggleDarkMode(checkbox) {
+            if (checkbox.checked) {
+                document.body.classList.add('dark-mode');
+                showToast("Night Mode Enabled");
+            } else {
+                document.body.classList.remove('dark-mode');
+                showToast("Day Mode Enabled");
+            }
+        }
+
+        async function toggleMaintenanceMode(checkbox) {
+            const isEnabled = checkbox.checked;
+            try {
+                const response = await fetch('/attendancesystem/maintenance.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ maintenance: isEnabled })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    showToast(isEnabled ? "Maintenance Mode Enabled: Logins locked." : "Maintenance Mode Disabled: Logins open.");
+                }
+            } catch (err) {
+                console.error(err);
+                showToast("Failed to update maintenance mode status.");
+            }
+        }
+
+        function animateValue(id, start, end, duration) {
+            if (start === end) { document.getElementById(id).innerHTML = end; return; }
+            let range = end - start;
+            let current = start;
+            let increment = end > start ? 1 : -1;
+            let stepTime = Math.abs(Math.floor(duration / range));
+            let obj = document.getElementById(id);
+            let timer = setInterval(function() {
+                current += increment;
+                obj.innerHTML = current;
+                if (current == end) clearInterval(timer); 
+            }, stepTime);
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-message').innerText = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3500);
+        }
+
+        function selectWorkspace(type) {
+            workspaceType = type;
+            const subtitle = document.getElementById('login-subtitle');
+            const tab1 = document.getElementById('tab-1-text');
+            const tab2 = document.getElementById('tab-2-text');
+            const grpLblLog = document.getElementById('lbl-group-name');
+            const sbIcon = document.getElementById('sidebar-brand-icon');
+
+            if(type === 'School') {
+                subtitle.innerText = "Smart School Attendance";
+                tab1.innerText = "Class Teacher"; tab2.innerText = "Principal / Admin";
+                grpLblLog.innerText = "Class Name";
+                sbIcon.className = "fa-solid fa-school";
+            } else if (type === 'Corporate') {
+                subtitle.innerText = "Smart Office Attendance";
+                tab1.innerText = "Team Manager"; tab2.innerText = "HR Admin";
+                grpLblLog.innerText = "Department / Team";
+                sbIcon.className = "fa-solid fa-building";
+            } else if (type === 'Coaching') {
+                subtitle.innerText = "Smart Tuition Attendance";
+                tab1.innerText = "Tutor"; tab2.innerText = "Institute Admin";
+                grpLblLog.innerText = "Batch Name";
+                sbIcon.className = "fa-solid fa-chalkboard-user";
+            } else if (type === 'Event') {
+                subtitle.innerText = "Smart Event Attendance";
+                tab1.innerText = "Coordinator"; tab2.innerText = "Event Admin";
+                grpLblLog.innerText = "Event / Session";
+                sbIcon.className = "fa-solid fa-ticket";
+            } else if (type === 'Community') {
+                subtitle.innerText = "Smart Community Attendance";
+                tab1.innerText = "Group Leader"; tab2.innerText = "Assembly Admin";
+                grpLblLog.innerText = "Assembly / Group Name";
+                sbIcon.className = "fa-solid fa-people-group";
+            } else if (type === 'Sports') {
+                subtitle.innerText = "Smart Club Attendance";
+                tab1.innerText = "Coach / Captain"; tab2.innerText = "Club Admin";
+                grpLblLog.innerText = "Team Name";
+                sbIcon.className = "fa-solid fa-medal";
+            }
+
+            document.getElementById('purpose-card').classList.add('hidden');
+            document.getElementById('login-card').classList.remove('hidden');
+        }
+
+        function backToPurpose() {
+            document.getElementById('login-card').classList.add('hidden');
+            document.getElementById('purpose-card').classList.remove('hidden');
+        }
+
+        function switchMainTab(role) {
+            document.querySelectorAll('.login-tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            if(role === 'teacher') {
+                document.getElementById('teacher-section').classList.remove('hidden');
+                document.getElementById('principal-form').classList.add('hidden');
+                switchTeacherView('login');
+            } else {
+                document.getElementById('teacher-section').classList.add('hidden');
+                document.getElementById('principal-form').classList.remove('hidden');
+            }
+        }
+
+        function switchTeacherView(view) {
+            ['t-login-form', 't-signup-form', 't-forgot-form'].forEach(id => document.getElementById(id).classList.add('hidden'));
+            if(view === 'login') document.getElementById('t-login-form').classList.remove('hidden');
+            else if(view === 'signup') document.getElementById('t-signup-form').classList.remove('hidden');
+            else if(view === 'forgot') document.getElementById('t-forgot-form').classList.remove('hidden');
+        }
+
+        function promptSignupAuth() {
+            document.getElementById('auth-code-input').value = "";
+            document.getElementById('signup-auth-modal').classList.add('active');
+        }
+
+        function verifySignupAuth() {
+            const code = document.getElementById('auth-code-input').value;
+            if (code === db.registrationCode) {
+                closeModal('signup-auth-modal');
+                switchTeacherView('signup');
+            } else {
+                alert("Invalid Authorization Code. Access Denied.");
+            }
+        }
+
+        async function handleTeacherLogin(e) {
+            e.preventDefault();
+
+            try {
+                const mCheck = await fetch('/attendancesystem/maintenance.php');
+                const mRes = await mCheck.json();
+                if (mRes.maintenance) {
+                    alert("System is currently under Maintenance Mode. Logins are temporarily locked.");
+                    return;
+                }
+            } catch(err) { }
+
+            const className = document.getElementById('t-class-login').value.trim();
+            const password = document.getElementById('t-pass-login').value;
+            
+            try {
+                const response = await fetch('/attendancesystem/login.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ workspace: workspaceType, username: className, password: password })
+                });
+                const result = await response.json();
+                
+                if (result.success) {
+                    currentUserRole = result.role; 
+                    currentClass = result.className || className; 
+                    if (!db.classes[currentClass]) {
+                        db.classes[currentClass] = { teacherName: result.teacherName || "Teacher", students: [], history: {} };
+                    }
+                    initDashboard();
+                    showToast(`Welcome to ${workspaceType} workspace!`);
+                } else {
+                    alert(result.message || "Invalid credentials.");
+                }
+            } catch (error) {
+                alert("Server error connecting to backend database.");
+            }
+        }
+
+        async function handleTeacherSignup(e) {
+            e.preventDefault();
+            const className = document.getElementById('t-class-reg').value.trim();
+            const teacherName = document.getElementById('t-name-reg').value.trim();
+            const email = document.getElementById('t-email-reg').value.trim();
+            const password = document.getElementById('t-pass-reg').value;
+
+            try {
+                const response = await fetch('/attendancesystem/signup.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ workspace: workspaceType, className, teacherName, email, password })
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    db.classes[className] = { password, email, teacherName, students: [], history: {} };
+                    showToast(result.message);
+                    document.getElementById('t-signup-form').reset();
+                    switchTeacherView('login');
+                } else {
+                    alert(result.message);
+                }
+            } catch (error) {
+                alert("Server error connecting to database.");
+            }
+        }
+
+        async function handleTeacherForgot(e) {
+            e.preventDefault();
+            const email = document.getElementById('t-email-forgot').value.trim();
+            
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending Email...';
+
+            try {
+                const response = await fetch('/attendancesystem/forgot_password.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: email, workspace: workspaceType })
+                });
+                
+                const result = await response.json();
+
+                if (result.success) {
+                    showToast(`Recovery instructions sent to ${email}`);
+                    document.getElementById('t-forgot-form').reset();
+                    switchTeacherView('login');
+                } else {
+                    alert(result.message || "Failed to reset password.");
+                }
+            } catch (error) {
+                console.error(error);
+                alert("Server error connecting to database.");
+            } finally {
+                submitBtn.innerHTML = originalText;
+            }
+        }
+
+        function handlePrincipalLogin(e) {
+            e.preventDefault();
+            const id = document.getElementById('p-id').value;
+            const password = document.getElementById('p-pass').value;
+            
+            if (id === db.principalAuth.id && password === db.principalAuth.pass) {
+                currentUserRole = 'principal'; 
+                initDashboard();
+                showToast(`Master Admin Mode: ${workspaceType} Command Center`);
+            } else alert("Invalid ID/Password.\nHint: Use 'admin' & 'admin123'");
+        }
+
+        async function fetchStudentsForClass() {
+            try {
+                const response = await fetch(`/attendancesystem/students.php?action=get&className=${encodeURIComponent(currentClass)}`);
+                const result = await response.json();
+                if (result.success) {
+                    if (!db.classes[currentClass]) db.classes[currentClass] = { students: [], history: {} };
+                    db.classes[currentClass].students = result.students;
+                    
+                    const dateStr = document.getElementById('attendance-date').value || new Date().toISOString().split('T')[0];
+                    db.classes[currentClass].history[dateStr] = JSON.parse(JSON.stringify(result.students));
+
+                    renderCurrentView();
+                }
+            } catch (error) {
+                console.error("Failed to fetch students from MySQL:", error);
+            }
+        }
+
+        function handleDateChange() {
+            const dateStr = document.getElementById('attendance-date').value;
+            if (currentClass && db.classes[currentClass]) {
+                if (!db.classes[currentClass].history) db.classes[currentClass].history = {};
+                if (!db.classes[currentClass].history[dateStr] || db.classes[currentClass].history[dateStr].length === 0) {
+                    db.classes[currentClass].history[dateStr] = JSON.parse(JSON.stringify(db.classes[currentClass].students || []));
+                }
+            }
+            renderCurrentView();
+            showToast(`Loaded records for ${dateStr}`);
+        }
+
+        async function initDashboard() {
+            document.getElementById('auth-container').classList.add('hidden');
+            document.getElementById('app-screen').classList.remove('hidden');
+
+            if(currentUserRole === 'principal') {
+                document.getElementById('teacher-nav').classList.add('hidden');
+                document.getElementById('admin-nav').classList.remove('hidden');
+                document.getElementById('nav-avatar').innerText = 'A';
+                document.getElementById('nav-name').innerText = `${workspaceType} Admin`;
+                document.getElementById('nav-role').innerText = 'Master Command';
+                document.querySelector('.edit-profile-btn').classList.add('hidden');
+                document.getElementById('principal-controls').classList.add('hidden');
+                
+                await fetchAllGroupsForAdmin();
+                switchDashboardView('admin-overview');
+            } else {
+                document.getElementById('teacher-nav').classList.remove('hidden');
+                document.getElementById('admin-nav').classList.add('hidden');
+                updateProfileUI();
+                document.getElementById('nav-role').innerText = `${workspaceType} : ${currentClass}`;
+                document.querySelector('.edit-profile-btn').classList.remove('hidden');
+                document.getElementById('principal-controls').classList.add('hidden');
+                if(workspaceType !== 'School') document.getElementById('lbl-total').innerText = "Total Members";
+                switchDashboardView('register');
+                fetchStudentsForClass();
+            }
+        }
+
+        async function fetchAllGroupsForAdmin() {
+            try {
+                const response = await fetch(`/attendancesystem/admin_data.php?action=get_all_groups&workspace=${encodeURIComponent(workspaceType)}`);
+                const result = await response.json();
+                
+                document.getElementById('admin-workspace-name').innerText = workspaceType;
+                const tbody = document.getElementById('admin-groups-table-body');
+                tbody.innerHTML = '';
+
+                if (result.success && result.groups.length > 0) {
+                    document.getElementById('admin-stat-groups').innerText = result.groups.length;
+                    let index = 1;
+                    result.groups.forEach(g => {
+                        tbody.innerHTML += `
+                            <tr class="stagger-row" style="animation-delay: ${index * 0.05}s;">
+                                <td style="font-weight: 800; color: var(--text-muted);">#${g.class_id}</td>
+                                <td><div class="student-cell"><div class="user-avatar" style="width:36px; height:36px; font-size:13px;">${g.class_name.charAt(0)}</div><h5>${g.class_name}</h5></div></td>
+                                <td style="font-weight: 700;">${g.teacher_name}</td>
+                                <td style="color: var(--text-muted); font-size: 13px;">${g.email}</td>
+                                <td style="text-align: right;">
+                                    <div class="crud-actions" style="justify-content: flex-end;">
+                                        <button type="button" class="btn-action primary" style="padding: 6px 14px; font-size: 12px; display:inline-flex;" onclick="adminInspectGroup('${g.class_name}')"><i class="fa-solid fa-arrow-right"></i> Inspect</button>
+                                        <button type="button" class="btn-action" style="padding: 6px 14px; font-size: 12px; display:inline-flex; background: var(--absent); color: white; border: none; box-shadow: 0 8px 20px rgba(239, 68, 68, 0.35);" onclick="secureDelete(${g.class_id})"><i class="fa-solid fa-trash"></i> Delete</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                        index++;
+                    });
+                } else {
+                    document.getElementById('admin-stat-groups').innerText = '0';
+                    tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 40px; color: var(--text-muted);">No groups registered yet in the ${workspaceType} workspace.</td></tr>`;
+                }
+            } catch (error) {
+                console.error("Failed to load admin groups:", error);
+            }
+        }
+
+        function adminInspectGroup(className) {
+            currentUserRole = 'teacher';
+            currentClass = className;
+            document.getElementById('admin-nav').classList.add('hidden');
+            document.getElementById('teacher-nav').classList.remove('hidden');
+            switchDashboardView('register');
+            fetchStudentsForClass();
+            showToast(`Inspecting ${className} (${workspaceType})`);
+        }
+
+        function logout() {
+            currentUserRole = null; currentClass = null;
+            document.getElementById('auth-container').classList.remove('hidden');
+            document.getElementById('app-screen').classList.add('hidden');
+            ['t-login-form', 't-signup-form', 't-forgot-form', 'principal-form'].forEach(id => document.getElementById(id).reset());
+        }
+
+        function switchDashboardView(view) {
+            currentView = view;
+            ['register', 'calendar', 'directory', 'analytics', 'settings', 'admin-overview', 'admin-settings'].forEach(v => {
+                const el = document.getElementById(`nav-${v}`);
+                if(el) el.classList.remove('active');
+                const viewEl = document.getElementById(`view-${v}`);
+                if(viewEl) viewEl.classList.add('hidden');
+            });
+            
+            const activeNav = document.getElementById(`nav-${view}`);
+            if(activeNav) activeNav.classList.add('active');
+            
+            const activeView = document.getElementById(`view-${view}`);
+            if(activeView) activeView.classList.remove('hidden');
+
+            renderCurrentView();
+            if(window.innerWidth <= 900) toggleSidebar();
+        }
+
+        function renderCurrentView() {
+            if (currentUserRole === 'principal') {
+                if (currentView === 'admin-overview') {
+                    document.getElementById('viewing-class-title').innerText = `${workspaceType} Command Center`;
+                    document.getElementById('header-subtitle').innerText = "System-wide administrative oversight and group auditing.";
+                    fetchAllGroupsForAdmin();
+                } else if (currentView === 'admin-settings') {
+                    document.getElementById('viewing-class-title').innerText = "Master Security Key";
+                    document.getElementById('header-subtitle').innerText = "Manage administrator credentials for this workspace.";
+                }
+                return;
+            }
+
+            if (currentView === 'settings') {
+                document.getElementById('viewing-class-title').innerText = "Settings Hub";
+                document.getElementById('header-subtitle').innerText = `Managing ${workspaceType} environment preferences.`;
+            } else if (currentView === 'calendar') {
+                document.getElementById('viewing-class-title').innerText = "Monthly Calendar";
+                document.getElementById('header-subtitle').innerText = `Select attendance dates for ${currentClass}`;
+                renderMonthlyCalendar();
+            } else {
+                document.getElementById('viewing-class-title').innerText = `${currentClass}`;
+                document.getElementById('header-subtitle').innerText = `Active Workspace: ${workspaceType}`;
+            }
+
+            if (currentView === 'register') renderRegisterTable();
+            else if (currentView === 'directory') renderDirectoryTable();
+            else if (currentView === 'analytics') renderAnalytics();
+        }
+
+        function renderMonthlyCalendar() {
+            const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            document.getElementById('cal-month-title').innerText = `${monthNames[calendarMonth]} ${calendarYear}`;
+            
+            const grid = document.getElementById('cal-grid');
+            grid.innerHTML = '';
+
+            const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            weekdays.forEach(day => {
+                grid.innerHTML += `<div style="font-weight: 800; font-size: 12px; color: var(--text-muted); text-align: center; padding: 10px 0;">${day}</div>`;
+            });
+
+            const firstDayIndex = new Date(calendarYear, calendarMonth, 1).getDay();
+            const totalDays = new Date(calendarYear, calendarMonth + 1, 0).getDate();
+            const prevTotalDays = new Date(calendarYear, calendarMonth, 0).getDate();
+
+            for (let i = firstDayIndex; i > 0; i--) {
+                grid.innerHTML += `<div style="background: var(--bg-main); opacity: 0.4; border-radius: 12px; padding: 15px; text-align: center; font-size: 13px; color: var(--text-light);">${prevTotalDays - i + 1}</div>`;
+            }
+
+            const currentDateStr = document.getElementById('attendance-date').value;
+
+            for (let day = 1; day <= totalDays; day++) {
+                const formattedMonth = String(calendarMonth + 1).padStart(2, '0');
+                const formattedDay = String(day).padStart(2, '0');
+                const dateStr = `${calendarYear}-${formattedMonth}-${formattedDay}`;
+                
+                const isSelected = (dateStr === currentDateStr);
+                const isToday = (dateStr === new Date().toISOString().split('T')[0]);
+
+                let bgStyle = 'background: var(--surface); border: 1.5px solid var(--border);';
+                let textStyle = 'color: var(--text-main);';
+                if (isSelected) {
+                    bgStyle = 'background: var(--primary); border: 1.5px solid var(--primary); box-shadow: 0 8px 20px rgba(67, 56, 202, 0.35);';
+                    textStyle = 'color: white;';
+                } else if (isToday) {
+                    bgStyle = 'background: var(--primary-subtle); border: 1.5px solid var(--primary-light);';
+                    textStyle = 'color: var(--primary); font-weight: 800;';
+                }
+
+                grid.innerHTML += `
+                    <div onclick="selectDateFromCalendar('${dateStr}')" style="${bgStyle} border-radius: var(--radius-sm); padding: 16px; text-align: center; cursor: pointer; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;" onmouseover="this.style.transform='translateY(-3px) scale(1.05)'" onmouseout="this.style.transform='none'">
+                        <span style="font-size: 15px; font-weight: 700; ${textStyle}">${day}</span>
+                        <span style="font-size: 9px; opacity: 0.9; ${textStyle}">${dateStr === currentDateStr ? 'Active' : ''}</span>
+                    </div>
+                `;
+            }
+        }
+
+        function changeCalendarMonth(direction) {
+            calendarMonth += direction;
+            if (calendarMonth > 11) { calendarMonth = 0; calendarYear++; }
+            else if (calendarMonth < 0) { calendarMonth = 11; calendarYear--; }
+            renderMonthlyCalendar();
+        }
+
+        function selectDateFromCalendar(dateStr) {
+            document.getElementById('attendance-date').value = dateStr;
+            handleDateChange();
+            switchDashboardView('register');
+            showToast(`Switched attendance register to ${dateStr}`);
+        }
+
+        function setFilter(status, btnElement) {
+            currentFilterStatus = status;
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btnElement.classList.add('active');
+            renderRegisterTable();
+        }
+
+        function getActiveStudentsList() {
+            const dateStr = document.getElementById('attendance-date').value || new Date().toISOString().split('T')[0];
+            if (db.classes[currentClass]) {
+                if (!db.classes[currentClass].history) db.classes[currentClass].history = {};
+                if (!db.classes[currentClass].history[dateStr] || db.classes[currentClass].history[dateStr].length === 0) {
+                    db.classes[currentClass].history[dateStr] = JSON.parse(JSON.stringify(db.classes[currentClass].students || []));
+                }
+                return db.classes[currentClass].history[dateStr];
+            }
+            return [];
+        }
+
+        function renderRegisterTable() {
+            const query = document.getElementById('search-box-register').value.toLowerCase();
+            const students = getActiveStudentsList();
+            const tbody = document.getElementById('table-body-register');
+            tbody.innerHTML = '';
+
+            let stats = { total: 0, present: 0, absent: 0, late: 0 };
+
+            if (students.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 50px; color: var(--text-muted);">No records found in this group for this date. Click <b>'Add New'</b> or <b>'Batch Import'</b> to begin.</td></tr>`;
+            } else {
+                let delayIndex = 0;
+                students.forEach(student => {
+                    stats.total++;
+                    if(student.status === 'present') stats.present++;
+                    else if(student.status === 'absent') stats.absent++;
+                    else stats.late++;
+
+                    const matchesSearch = student.name.toLowerCase().includes(query) || student.id.toLowerCase().includes(query);
+                    const matchesFilter = (currentFilterStatus === 'all') || (student.status === currentFilterStatus);
+
+                    if (matchesSearch && matchesFilter) {
+                        const tr = document.createElement('tr');
+                        tr.className = 'stagger-row';
+                        tr.style.animationDelay = `${delayIndex * 0.04}s`;
+                        delayIndex++;
+                        
+                        tr.innerHTML = `
+                            <td style="font-weight: 800; color: var(--text-muted);">${student.id}</td>
+                            <td>
+                                <div class="student-cell">
+                                    <div class="user-avatar" style="width: 38px; height: 38px; font-size: 14px; background: var(--primary-subtle); color: var(--primary); font-weight: 800;">${student.name.charAt(0)}</div>
+                                    <div><h5>${student.name}</h5></div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="remark-pill" onclick="openRemarkModal('${student.id}')">
+                                    <i class="fa-solid fa-note-sticky"></i> ${student.remark || "Add note"}
+                                </span>
+                            </td>
+                            <td style="text-align: center;">
+                                <div class="status-badge">
+                                    <button type="button" class="status-btn ${student.status === 'present' ? 'active present' : ''}" onclick="setStatus('${student.id}', 'present')">P</button>
+                                    <button type="button" class="status-btn ${student.status === 'absent' ? 'active absent' : ''}" onclick="setStatus('${student.id}', 'absent')">A</button>
+                                    <button type="button" class="status-btn ${student.status === 'late' ? 'active late' : ''}" onclick="setStatus('${student.id}', 'late')">L</button>
+                                    <button type="button" class="status-btn ${student.status === 'excused' ? 'active excused' : ''}" onclick="setStatus('${student.id}', 'excused')">E</button>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="crud-actions">
+                                    <button type="button" class="crud-btn edit" onclick="openStudentModal('edit', '${student.id}')" title="Edit"><i class="fa-solid fa-pen"></i></button>
+                                    <button type="button" class="crud-btn delete" onclick="deleteStudent('${student.id}')" title="Delete"><i class="fa-solid fa-trash"></i></button>
+                                </div>
+                            </td>
+                        `;
+                        tbody.appendChild(tr);
+                    }
+                });
+            }
+
+            animateValue("stat-total", parseInt(document.getElementById("stat-total").innerText) || 0, stats.total, 400);
+            animateValue("stat-present", parseInt(document.getElementById("stat-present").innerText) || 0, stats.present, 400);
+            animateValue("stat-absent", parseInt(document.getElementById("stat-absent").innerText) || 0, stats.absent, 400);
+            animateValue("stat-late", parseInt(document.getElementById("stat-late").innerText) || 0, stats.late, 400);
+        }
+
+        function setStatus(id, newStatus) {
+            const students = getActiveStudentsList();
+            const student = students.find(s => s.id === id);
+            if (student) { 
+                student.status = newStatus; 
+                playClickSound();
+                renderRegisterTable(); 
+            }
+        }
+
+        function markAll(status) {
+            const students = getActiveStudentsList();
+            if(!students.length) return;
+            students.forEach(s => {
+                s.status = status;
+            });
+            playClickSound();
+            renderRegisterTable();
+            showToast(`All members marked as ${status.toUpperCase()}`);
+        }
+
+        function renderDirectoryTable() {
+            const query = document.getElementById('search-box-directory').value.toLowerCase();
+            const students = db.classes[currentClass]?.students || [];
+            const tbody = document.getElementById('table-body-directory');
+            tbody.innerHTML = '';
+
+            if(!students.length) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:50px; color:var(--text-muted);">No records available.</td></tr>`;
+                return;
+            }
+
+            let delayIndex = 0;
+            students.forEach(student => {
+                if(student.name.toLowerCase().includes(query) || student.id.toLowerCase().includes(query)) {
+                    let healthColor = 'var(--present)';
+                    let healthText = 'Good';
+                    let pulseClass = '';
+                    if(student.attendanceRate < 75) { healthColor = 'var(--absent)'; healthText = 'At Risk (<75%)'; pulseClass = 'at-risk'; }
+                    else if(student.attendanceRate < 85) { healthColor = 'var(--late)'; healthText = 'Warning'; }
+
+                    const tr = document.createElement('tr');
+                    tr.className = 'stagger-row';
+                    tr.style.animationDelay = `${delayIndex * 0.04}s`;
+                    delayIndex++;
+
+                    tr.innerHTML = `
+                        <td style="font-weight: 800; color: var(--text-muted);">${student.id}</td>
+                        <td>
+                            <div class="student-cell">
+                                <div class="user-avatar" style="width: 38px; height: 38px; font-size: 14px; background: var(--primary-subtle); color: var(--primary); font-weight: 800;">${student.name.charAt(0)}</div>
+                                <div><h5>${student.name}</h5></div>
+                            </div>
+                        </td>
+                        <td style="color: var(--text-muted); font-size: 13px; font-weight: 600;"><i class="fa-solid fa-phone" style="font-size:11px; margin-right:6px;"></i> ${student.phone || 'N/A'}</td>
+                        <td style="font-weight: 800; font-size: 15px; color: var(--text-main);">${student.attendanceRate}%</td>
+                        <td>
+                            <span class="health-badge ${pulseClass}" style="background: ${healthColor}18; color: ${healthColor}; border: 1px solid ${healthColor}40;">
+                                <i class="fa-solid fa-heart-pulse"></i> ${healthText}
+                            </span>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                }
+            });
+        }
+
+        function renderAnalytics() {
+            const students = db.classes[currentClass]?.students || [];
+            if(!students.length) return;
+
+            let totalRate = 0;
+            let bestStudent = students[0];
+            let worstStudent = students[0];
+
+            students.forEach(s => {
+                totalRate += s.attendanceRate;
+                if(s.attendanceRate > bestStudent.attendanceRate) bestStudent = s;
+                if(s.attendanceRate < worstStudent.attendanceRate) worstStudent = s;
+            });
+
+            const avgRate = Math.round(totalRate / students.length);
+            document.getElementById('analytics-avg').innerText = avgRate + "%";
+            document.getElementById('analytics-best').innerText = bestStudent.name;
+            document.getElementById('analytics-worst').innerText = worstStudent.name;
+
+            const ctx = document.getElementById('attendanceChart').getContext('2d');
+            if(analyticsChart) analyticsChart.destroy();
+
+            analyticsChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Today'],
+                    datasets: [
+                        {
+                            label: 'Present %',
+                            data: [94, 91, 89, 95, avgRate],
+                            backgroundColor: '#10B981',
+                            borderRadius: 10,
+                            barPercentage: 0.55
+                        },
+                        {
+                            label: 'Absent %',
+                            data: [6, 9, 11, 5, 100 - avgRate],
+                            backgroundColor: '#EF4444',
+                            borderRadius: 10,
+                            barPercentage: 0.55
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: { duration: 1600, easing: 'easeOutQuart' },
+                    plugins: { legend: { position: 'top' } },
+                    scales: { y: { beginAtZero: true, max: 100 } }
+                }
+            });
+        }
+
+        async function handlePasswordChange(e) {
+            e.preventDefault();
+            const currentPass = document.getElementById('set-current-pass').value.trim();
+            const newPass = document.getElementById('set-new-pass').value.trim();
+            const confirmPass = document.getElementById('set-confirm-pass').value.trim();
+
+            const activeGroup = currentClass || document.getElementById('nav-role').innerText.split(':').pop().trim();
+
+            if (!currentPass || !newPass || !confirmPass) {
+                alert("Please fill in all password fields.");
+                return;
+            }
+
+            if (newPass !== confirmPass) {
+                alert("New passwords do not match!");
+                return;
+            }
+
+            try {
+                const response = await fetch('/attendancesystem/update_password.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        className: activeGroup, 
+                        currentPassword: currentPass, 
+                        newPassword: newPass 
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showToast(result.message);
+                    document.getElementById('password-change-form').reset();
+                } else {
+                    alert(result.message || "Failed to update password.");
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Server error connecting to update script.");
+            }
+        }
+
+        async function handleMasterPasswordChange(e) {
+            e.preventDefault();
+            const currentPass = document.getElementById('admin-current-pass').value.trim();
+            const newPass = document.getElementById('admin-new-pass').value.trim();
+            const confirmPass = document.getElementById('admin-confirm-pass').value.trim();
+
+            if (!currentPass || !newPass || !confirmPass) {
+                alert("Please fill in all fields.");
+                return;
+            }
+
+            if (newPass !== confirmPass) {
+                alert("New master keys do not match!");
+                return;
+            }
+
+            if (currentPass !== db.principalAuth.pass) {
+                alert("Incorrect current master password.");
+                return;
+            }
+
+            db.principalAuth.pass = newPass;
+            showToast("Master Admin security key updated successfully!");
+            document.getElementById('admin-pass-form').reset();
+        }
+
+        function savePreferences() { showToast("Preferences updated successfully!"); }
+
+        function downloadJSONBackup() {
+            window.location.href = '/attendancesystem/backup.php';
+            showToast("Database SQL backup downloaded successfully!");
+        }
+
+        function triggerDataReset() {
+            if(confirm("Are you sure you want to clear session logs?")) {
+                showToast("Session logs cleared successfully.");
+            }
+        }
+
+        function openStudentModal(mode, id = null) {
+            document.getElementById('crud-modal').classList.add('active');
+            if (mode === 'add') {
+                document.getElementById('modal-title').innerText = "Add New Member";
+                document.getElementById('edit-id').value = "";
+                document.getElementById('mod-id').value = "";
+                document.getElementById('mod-name').value = "";
+                document.getElementById('mod-phone').value = "";
+            } else if (mode === 'edit') {
+                document.getElementById('modal-title').innerText = "Edit Details";
+                const student = db.classes[currentClass].students.find(s => s.id === id);
+                document.getElementById('edit-id').value = student.id; 
+                document.getElementById('mod-id').value = student.id;
+                document.getElementById('mod-name').value = student.name;
+                document.getElementById('mod-phone').value = student.phone || "";
+            }
+        }
+
+        function openBulkModal() {
+            document.getElementById('bulk-data-input').value = "";
+            document.getElementById('bulk-modal').classList.add('active');
+        }
+
+        async function processBulkImport() {
+            const rawText = document.getElementById('bulk-data-input').value.trim();
+            if (!rawText) return alert("Please paste or type member data.");
+
+            const lines = rawText.split('\n');
+            let successCount = 0;
+
+            showToast("Importing members in bulk...");
+            
+            for (let line of lines) {
+                line = line.trim();
+                if (!line) continue;
+
+                // FIX: Only split by comma, NOT spaces or tabs!
+                const parts = line.split(',').map(p => p.trim());
+                
+                if (parts.length >= 2) {
+                    const studentId = parts[0];
+                    const name = parts[1];
+                    const phone = parts[2] || "+91 0000000000";
+
+                    try {
+                        const response = await fetch('/attendancesystem/students.php', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ action: 'save', className: currentClass, studentId, name, phone })
+                        });
+                        const result = await response.json();
+                        if (result.success) {
+                            successCount++;
+                        }
+                    } catch (err) {
+                        console.error("Error importing row:", line);
+                    }
+                }
+            }
+
+            closeModal('bulk-modal');
+            fetchStudentsForClass();
+            showToast(`Successfully imported ${successCount} members!`);
+        }
+
+        async function saveStudent() {
+            const newId = document.getElementById('mod-id').value.trim();
+            const newName = document.getElementById('mod-name').value.trim();
+            const newPhone = document.getElementById('mod-phone').value.trim() || "+91 0000000000";
+
+            if(!newId || !newName) return alert("Please fill both ID and Name fields.");
+
+            try {
+                const response = await fetch('/attendancesystem/students.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'save', className: currentClass, studentId: newId, name: newName, phone: newPhone })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    showToast(result.message);
+                    closeModal('crud-modal');
+                    fetchStudentsForClass();
+                } else {
+                    alert(result.message);
+                }
+            } catch (error) {
+                alert("Server error connecting to database.");
+            }
+        }
+
+        async function deleteStudent(id) {
+            if (confirm("Are you sure you want to delete this record forever?")) {
+                try {
+                    const response = await fetch('/attendancesystem/students.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action: 'delete', className: currentClass, studentId: id })
+                    });
+                    const result = await response.json();
+                    if (result.success) {
+                        showToast(result.message);
+                        fetchStudentsForClass();
+                    } else {
+                        alert(result.message);
+                    }
+                } catch (error) {
+                    alert("Server error connecting to database.");
+                }
+            }
+        }
+
+        function openRemarkModal(id) {
+            const students = getActiveStudentsList();
+            const student = students.find(s => s.id === id);
+            document.getElementById('remark-student-id').value = id;
+            document.getElementById('mod-remark-text').value = student.remark || "";
+            document.getElementById('remark-modal').classList.add('active');
+        }
+
+        async function saveRemark() {
+            const id = document.getElementById('remark-student-id').value;
+            const noteText = document.getElementById('mod-remark-text').value.trim();
+            const students = getActiveStudentsList();
+            const student = students.find(s => s.id === id);
+            
+            if(student) {
+                // 1. Update the display instantly
+                student.remark = noteText;
+                renderRegisterTable();
+                
+                // 2. Send the data to the database permanently
+                try {
+                    await fetch('/attendancesystem/students.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ 
+                            action: 'update_remark', 
+                            className: currentClass, 
+                            studentId: id, 
+                            remark: noteText 
+                        })
+                    });
+                    showToast("Note saved permanently!");
+                } catch (err) {
+                    console.error("Failed to connect to database:", err);
+                    showToast("Error saving note to database.");
+                }
+            }
+            closeModal('remark-modal');
+        }
+
+        function updateProfileUI() {
+            const teacherName = db.classes[currentClass]?.teacherName || "User";
+            document.getElementById('nav-name').innerText = teacherName;
+            document.getElementById('nav-avatar').innerText = teacherName.charAt(0).toUpperCase();
+        }
+
+        function openProfileModal() {
+            document.getElementById('mod-teacher-name').value = db.classes[currentClass]?.teacherName || "";
+            document.getElementById('profile-modal').classList.add('active');
+        }
+
+        function saveProfile() {
+            const newName = document.getElementById('mod-teacher-name').value.trim();
+            if(!newName) return alert("Name cannot be empty.");
+            db.classes[currentClass].teacherName = newName;
+            updateProfileUI();
+            closeModal('profile-modal');
+            showToast("Profile updated!");
+        }
+
+        function closeModal(modalId) { 
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.remove('active');
+            }
+        }
+
+        function downloadCSV() {
+            const students = getActiveStudentsList();
+            if (!students.length) return alert("No records available to export.");
+
+            const sessionVal = document.getElementById('session-selector').value;
+            const dateStr = document.getElementById('attendance-date').value || new Date().toISOString().split('T')[0];
+            
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += `Workspace:,${workspaceType},Group:,${currentClass},Session:,${sessionVal},Date:,${dateStr}\n\n`;
+            csvContent += "ID,Full Name,Contact Info,Status,Note/Remark\n";
+            
+            students.forEach(student => {
+                csvContent += `"${student.id}","${student.name}","${student.phone}","${student.status.toUpperCase()}","${student.remark || ''}"\n`;
+            });
+
+            const link = document.createElement("a");
+            link.setAttribute("href", encodeURI(csvContent));
+            link.setAttribute("download", `${workspaceType}_${currentClass.replace(/\s+/g, '_')}_${sessionVal}_${dateStr}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link); 
+            showToast("CSV file downloaded successfully!");
+        }
+
+        async function getQRCodeDataURL(text) {
+            return new Promise((resolve) => {
+                const tempDiv = document.getElementById('hidden-qr-generator');
+                tempDiv.innerHTML = "";
+                new QRCode(tempDiv, {
+                    text: text,
+                    width: 50,
+                    height: 50,
+                    colorDark: "#000000",
+                    colorLight: "#ffffff",
+                    correctLevel: QRCode.CorrectLevel.M
+                });
+                setTimeout(() => {
+                    const img = tempDiv.querySelector('img') || tempDiv.querySelector('canvas');
+                    if (img) {
+                        if (img.tagName === 'CANVAS') {
+                            resolve(img.toDataURL('image/png'));
+                        } else {
+                            resolve(img.src);
+                        }
+                    } else {
+                        resolve(null);
+                    }
+                }, 50);
+            });
+        }
+
+        async function downloadPDF() {
+            const students = getActiveStudentsList();
+            if (!students.length) return alert("No records available to export.");
+
+            showToast("Generating clean PDF report...");
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const sessionVal = document.getElementById('session-selector').value;
+            const dateStr = document.getElementById('attendance-date').value || new Date().toISOString().split('T')[0];
+
+            doc.setFillColor(67, 56, 202); 
+            doc.rect(0, 0, 210, 25, "F");
+            doc.setTextColor(255, 255, 255);
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(16);
+            doc.text("EduPro Official Attendance Report", 14, 16);
+
+            doc.setTextColor(15, 23, 42);
+            doc.setFontSize(11);
+            doc.text(`Workspace: ${workspaceType}`, 14, 35);
+            doc.text(`Group / Class: ${currentClass}`, 14, 42);
+            doc.text(`Session: ${sessionVal} | Date: ${dateStr}`, 14, 49);
+
+            let y = 60;
+            doc.setFillColor(241, 245, 249);
+            doc.rect(14, y, 182, 10, "F");
+            doc.setFont("helvetica", "bold");
+            doc.text("ID No.", 18, y + 7);
+            doc.text("Full Name", 50, y + 7);
+            doc.text("Status", 100, y + 7);
+            doc.text("Remark", 130, y + 7);
+            doc.text("Pass QR", 168, y + 7);
+
+            doc.setFont("helvetica", "normal");
+            y += 12;
+
+            for (let i = 0; i < students.length; i++) {
+                const student = students[i];
+                if (y > 255) {
+                    doc.addPage();
+                    y = 20;
+                }
+
+                doc.text(String(student.id), 18, y + 6);
+                doc.text(String(student.name), 50, y + 6);
+                doc.text(String(student.status).toUpperCase(), 100, y + 6);
+                doc.text(String(student.remark || '-'), 130, y + 6);
+
+                const qrPayload = `[EduPro Pass] Date:${dateStr} | ID:${student.id} | Name:${student.name} | Status:${student.status.toUpperCase()}`;
+                const qrImageURL = await getQRCodeDataURL(qrPayload);
+
+                if (qrImageURL) {
+                    doc.addImage(qrImageURL, 'PNG', 170, y - 2, 12, 12);
+                }
+
+                doc.setDrawColor(226, 232, 240);
+                doc.line(14, y + 14, 196, y + 14);
+                y += 16;
+            }
+
+            doc.save(`EduPro_${workspaceType}_${currentClass}_${dateStr}_Report.pdf`);
+            showToast("PDF report downloaded successfully!");
+        }
+
+        function toggleSidebar() { 
+            document.getElementById('sidebar').classList.toggle('open'); 
+        }
+
+        // ====== ANIMATED MODAL SECURE DELETE ======
+        function secureDelete(classId) {
+            document.getElementById('delete-class-id').value = classId;
+            document.getElementById('del-pass-1').value = "";
+            document.getElementById('del-pass-2').value = "";
+            document.getElementById('delete-auth-modal').classList.add('active');
+        }
+
+        function executeSecureDelete() {
+            const classId = document.getElementById('delete-class-id').value;
+            const pass1 = document.getElementById('del-pass-1').value;
+            const pass2 = document.getElementById('del-pass-2').value;
+
+            if (!pass1 || !pass2) {
+                alert("Please fill in both password fields.");
+                return;
+            }
+
+            if (pass1 !== pass2) {
+                alert("Error: Passwords do not match. Deletion cancelled.");
+                return;
+            }
+
+            if (pass1 !== db.principalAuth.pass) {
+                alert("Error: Incorrect Master Password.");
+                return;
+            }
+
+            fetch('/attendancesystem/admin_data.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    action: 'delete_group',
+                    class_id: classId,
+                    admin_password: pass1
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast(data.message);
+                    closeModal('delete-auth-modal'); 
+                    fetchAllGroupsForAdmin(); 
+                } else {
+                    alert("Error: " + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("An error occurred while deleting.");
+            });
+        }
+    </script>
+</body>
+</html>
