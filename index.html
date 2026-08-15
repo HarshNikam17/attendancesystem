@@ -1,15 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EduPro Enterprise | Smart Attendance System</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    
+
     <style>
         :root {
             --primary: #4338CA;
@@ -21,7 +23,7 @@
             --text-main: #0F172A;
             --text-muted: #64748B;
             --text-light: #94A3B8;
-            
+
             --present: #10B981;
             --present-bg: #D1FAE5;
             --absent: #EF4444;
@@ -30,12 +32,12 @@
             --late-bg: #FEF3C7;
             --excused: #3B82F6;
             --excused-bg: #DBEAFE;
-            
+
             --border: #E2E8F0;
             --radius-sm: 10px;
             --radius-md: 18px;
             --radius-lg: 28px;
-            
+
             --shadow-subtle: 0 10px 30px -5px rgba(15, 23, 42, 0.04);
             --shadow-hover: 0 20px 45px -10px rgba(67, 56, 202, 0.18);
             --shadow-glass: 0 30px 60px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.6);
@@ -51,262 +53,1427 @@
             --primary-subtle: #312E81;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
-        body { background-color: var(--bg-main); color: var(--text-main); overflow-x: hidden; min-height: 100vh; transition: background 0.3s ease, color 0.3s ease; }
-        button { cursor: pointer; outline: none; border: none; font-family: inherit; transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); }
-        input, select, textarea { outline: none; font-family: inherit; }
-        
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
 
-        @keyframes slideUpFade { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes slideInRight { from { opacity: 0; transform: translateX(35px); } to { opacity: 1; transform: translateX(0); } }
-        @keyframes popIn { 0% { opacity: 0; transform: scale(0.85); } 70% { transform: scale(1.03); } 100% { opacity: 1; transform: scale(1); } }
-        @keyframes float { 0% { transform: translateY(0px) rotate(0deg) scale(1); } 50% { transform: translateY(-25px) rotate(8deg) scale(1.05); } 100% { transform: translateY(0px) rotate(0deg) scale(1); } }
-        @keyframes pulseGlow { 0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); } 70% { box-shadow: 0 0 0 12px rgba(16, 185, 129, 0); } 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } }
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            overflow-x: hidden;
+            min-height: 100vh;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
 
-        .fade-in { animation: slideUpFade 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        .stagger-row { opacity: 0; animation: slideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        .hidden { display: none !important; }
+        button {
+            cursor: pointer;
+            outline: none;
+            border: none;
+            font-family: inherit;
+            transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        input,
+        select,
+        textarea {
+            outline: none;
+            font-family: inherit;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #CBD5E1;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94A3B8;
+        }
+
+        @keyframes slideUpFade {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(35px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes popIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.85);
+            }
+
+            70% {
+                transform: scale(1.03);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0px) rotate(0deg) scale(1);
+            }
+
+            50% {
+                transform: translateY(-25px) rotate(8deg) scale(1.05);
+            }
+
+            100% {
+                transform: translateY(0px) rotate(0deg) scale(1);
+            }
+        }
+
+        @keyframes pulseGlow {
+            0% {
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+            }
+
+            70% {
+                box-shadow: 0 0 0 12px rgba(16, 185, 129, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+            }
+        }
+
+        .fade-in {
+            animation: slideUpFade 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .stagger-row {
+            opacity: 0;
+            animation: slideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .hidden {
+            display: none !important;
+        }
 
         #auth-container {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
             background: radial-gradient(circle at 50% 50%, #1E1B4B 0%, #0F172A 100%);
-            display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px;
-            overflow: auto; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+            overflow: auto;
         }
-        
-        .ambient-blob { position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.45; animation: float 12s infinite ease-in-out; pointer-events: none; }
-        .blob-1 { width: 550px; height: 550px; background: var(--primary); top: -10%; left: -10%; animation-delay: 0s; }
-        .blob-2 { width: 450px; height: 450px; background: var(--secondary); bottom: -10%; right: -5%; animation-delay: -3s; animation-duration: 14s; }
-        .blob-3 { width: 350px; height: 350px; background: var(--present); top: 35%; left: 45%; animation-delay: -6s; animation-duration: 16s; opacity: 0.25; }
+
+        .ambient-blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(90px);
+            opacity: 0.45;
+            animation: float 12s infinite ease-in-out;
+            pointer-events: none;
+        }
+
+        .blob-1 {
+            width: 550px;
+            height: 550px;
+            background: var(--primary);
+            top: -10%;
+            left: -10%;
+            animation-delay: 0s;
+        }
+
+        .blob-2 {
+            width: 450px;
+            height: 450px;
+            background: var(--secondary);
+            bottom: -10%;
+            right: -5%;
+            animation-delay: -3s;
+            animation-duration: 14s;
+        }
+
+        .blob-3 {
+            width: 350px;
+            height: 350px;
+            background: var(--present);
+            top: 35%;
+            left: 45%;
+            animation-delay: -6s;
+            animation-duration: 16s;
+            opacity: 0.25;
+        }
 
         .glass-card {
-            background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(25px);
-            padding: 50px 45px; border-radius: var(--radius-lg); box-shadow: var(--shadow-glass);
-            border: 1px solid rgba(255, 255, 255, 0.5); position: relative; z-index: 2;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(25px);
+            padding: 50px 45px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-glass);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            position: relative;
+            z-index: 2;
             animation: popIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-            margin: auto; transition: transform 0.4s ease;
+            margin: auto;
+            transition: transform 0.4s ease;
         }
-        body.dark-mode .glass-card { background: rgba(30, 41, 59, 0.92); border-color: rgba(255, 255, 255, 0.1); }
 
-        #purpose-card { width: 100%; max-width: 900px; text-align: center; }
-        .purpose-header h2 { font-weight: 800; font-size: 34px; color: var(--text-main); margin-bottom: 10px; letter-spacing: -0.8px; }
-        .purpose-header p { color: var(--text-muted); font-size: 16px; margin-bottom: 40px; font-weight: 500; }
-        
-        .purpose-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
-        .purpose-option {
-            background: var(--bg-main); border: 2px solid var(--border); border-radius: var(--radius-md);
-            padding: 28px 22px; cursor: pointer; transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); display: flex; flex-direction: column; align-items: center;
+        body.dark-mode .glass-card {
+            background: rgba(30, 41, 59, 0.92);
+            border-color: rgba(255, 255, 255, 0.1);
         }
+
+        #purpose-card {
+            width: 100%;
+            max-width: 900px;
+            text-align: center;
+        }
+
+        .purpose-header h2 {
+            font-weight: 800;
+            font-size: 34px;
+            color: var(--text-main);
+            margin-bottom: 10px;
+            letter-spacing: -0.8px;
+        }
+
+        .purpose-header p {
+            color: var(--text-muted);
+            font-size: 16px;
+            margin-bottom: 40px;
+            font-weight: 500;
+        }
+
+        .purpose-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 22px;
+        }
+
+        .purpose-option {
+            background: var(--bg-main);
+            border: 2px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 28px 22px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
         .purpose-option:hover {
-            border-color: var(--primary); transform: translateY(-8px) scale(1.03); box-shadow: var(--shadow-hover);
+            border-color: var(--primary);
+            transform: translateY(-8px) scale(1.03);
+            box-shadow: var(--shadow-hover);
             background: var(--surface);
         }
+
         .purpose-icon {
-            width: 68px; height: 68px; border-radius: 20px; background: var(--primary-subtle); color: var(--primary);
-            display: flex; align-items: center; justify-content: center; font-size: 28px; margin-bottom: 18px; transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            width: 68px;
+            height: 68px;
+            border-radius: 20px;
+            background: var(--primary-subtle);
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            margin-bottom: 18px;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
-        .purpose-option:hover .purpose-icon { background: var(--primary); color: white; transform: scale(1.15) rotate(8deg); box-shadow: 0 10px 20px rgba(67, 56, 202, 0.3); }
-        .purpose-option h4 { font-size: 18px; font-weight: 800; color: var(--text-main); margin-bottom: 6px; }
-        .purpose-option span { font-size: 13px; color: var(--text-muted); font-weight: 600; }
 
-        #login-card { width: 100%; max-width: 480px; text-align: center; }
+        .purpose-option:hover .purpose-icon {
+            background: var(--primary);
+            color: white;
+            transform: scale(1.15) rotate(8deg);
+            box-shadow: 0 10px 20px rgba(67, 56, 202, 0.3);
+        }
+
+        .purpose-option h4 {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--text-main);
+            margin-bottom: 6px;
+        }
+
+        .purpose-option span {
+            font-size: 13px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        #login-card {
+            width: 100%;
+            max-width: 480px;
+            text-align: center;
+        }
+
         .brand-icon {
-            width: 70px; height: 70px; background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white; border-radius: 22px; display: flex; align-items: center; justify-content: center;
-            font-size: 32px; margin: 0 auto 24px; box-shadow: 0 15px 35px rgba(67, 56, 202, 0.4); transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-radius: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            margin: 0 auto 24px;
+            box-shadow: 0 15px 35px rgba(67, 56, 202, 0.4);
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
-        #login-card:hover .brand-icon { transform: rotate(12deg) scale(1.08); }
-        #login-card h2 { font-weight: 800; font-size: 28px; color: var(--text-main); margin-bottom: 6px; letter-spacing: -0.5px; }
-        #login-card p { color: var(--text-muted); margin-bottom: 30px; font-size: 14px; font-weight: 600; }
-        
-        .login-tabs { display: flex; background: var(--bg-main); border-radius: 50px; padding: 6px; margin-bottom: 28px; border: 1.5px solid var(--border); box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
-        .login-tab { flex: 1; padding: 13px; font-weight: 800; font-size: 13px; border-radius: 50px; color: var(--text-muted); background: transparent; transition: all 0.3s ease; }
-        .login-tab.active { background: var(--surface); color: var(--primary); box-shadow: 0 6px 20px rgba(67, 56, 202, 0.15); transform: scale(1.03); }
-        
-        .input-group { text-align: left; margin-bottom: 22px; position: relative; }
-        .input-group label { display: block; font-size: 11px; font-weight: 800; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.8px; }
-        .input-group input, .input-group select { width: 100%; padding: 15px 16px 15px 46px; border: 2px solid var(--border); border-radius: var(--radius-md); font-size: 14px; font-weight: 600; transition: all 0.3s ease; background: var(--bg-main); color: var(--text-main); }
-        .input-group input:focus, .input-group select:focus { border-color: var(--primary); background: var(--surface); box-shadow: 0 0 0 5px rgba(99, 102, 241, 0.15); transform: translateY(-1px); }
-        .input-group i { position: absolute; left: 16px; top: 41px; color: var(--text-light); font-size: 16px; transition: 0.3s; }
-        .input-group input:focus + i, .input-group input:focus ~ i { color: var(--primary); }
-        
-        .form-links { display: flex; justify-content: space-between; margin-bottom: 26px; font-size: 13px; font-weight: 700; }
-        .form-links a { color: var(--primary); text-decoration: none; position: relative; }
-        .form-links a::after { content: ''; position: absolute; bottom: -2px; left: 0; width: 0%; height: 2px; background: var(--primary); transition: width 0.3s ease; }
-        .form-links a:hover::after { width: 100%; }
 
-        .btn-primary { width: 100%; padding: 16px; background: linear-gradient(135deg, var(--primary), var(--primary-light)); color: white; font-weight: 800; border-radius: var(--radius-md); font-size: 15px; display: inline-flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 12px 30px rgba(67, 56, 202, 0.35); overflow: hidden; position: relative; }
-        .btn-primary::before { content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent); transform: skewX(-20deg); transition: 0.6s; }
-        .btn-primary:hover::before { left: 150%; }
-        .btn-primary:hover { transform: translateY(-4px) scale(1.01); box-shadow: 0 18px 40px rgba(67, 56, 202, 0.45); }
-
-        .back-btn { position: absolute; top: 30px; left: 30px; color: var(--text-muted); font-size: 18px; cursor: pointer; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); background: var(--bg-main); width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border); }
-        .back-btn:hover { background: var(--primary-subtle); color: var(--primary); transform: translateX(-4px) scale(1.05); border-color: var(--primary-light); }
-
-        #app-screen { display: flex; height: 100vh; overflow: hidden; }
-        
-        .sidebar { width: 290px; background: var(--surface); border-right: 1px solid var(--border); padding: 35px 25px; display: flex; flex-direction: column; z-index: 100; box-shadow: var(--shadow-subtle); }
-        .brand { font-size: 26px; font-weight: 800; color: var(--primary); display: flex; align-items: center; gap: 14px; margin-bottom: 40px; letter-spacing: -0.8px; }
-        .brand i { font-size: 30px; background: linear-gradient(135deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        
-        .nav-link { display: flex; align-items: center; gap: 15px; padding: 15px 20px; border-radius: var(--radius-md); color: var(--text-muted); font-weight: 700; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); margin-bottom: 8px; font-size: 14px; cursor: pointer; position: relative; overflow: hidden; }
-        .nav-link:hover { background: var(--bg-main); color: var(--primary); transform: translateX(6px); }
-        .nav-link.active { background: var(--primary); color: white; box-shadow: 0 10px 25px rgba(67, 56, 202, 0.3); transform: scale(1.02); }
-        
-        .user-profile { margin-top: auto; padding-top: 20px; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 14px; background: var(--bg-main); padding: 16px; border-radius: var(--radius-md); border: 1px solid var(--border); }
-        .user-avatar { width: 46px; height: 46px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 16px; box-shadow: 0 6px 18px rgba(67, 56, 202, 0.3); }
-        .user-info h4 { font-size: 14px; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 6px; }
-        .user-info span { font-size: 12px; color: var(--text-muted); font-weight: 600; }
-        .edit-profile-btn { color: var(--text-light); cursor: pointer; transition: 0.3s; font-size: 13px; }
-        .edit-profile-btn:hover { color: var(--primary); transform: rotate(20deg) scale(1.2); }
-        .logout-btn { color: var(--absent); background: var(--surface); width: 40px; height: 40px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 16px; margin-left: auto; cursor: pointer; border: 1px solid rgba(239, 68, 68, 0.2); transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
-        .logout-btn:hover { background: var(--absent); color: white; box-shadow: 0 8px 20px rgba(239, 68, 68, 0.4); transform: rotate(-15deg) scale(1.05); }
-
-        .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--bg-main); }
-        .top-header { background: var(--surface); backdrop-filter: blur(20px); padding: 22px 40px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; gap: 20px; z-index: 50; box-shadow: var(--shadow-subtle); }
-        .header-title h1 { font-size: 26px; font-weight: 800; letter-spacing: -0.8px; color: var(--text-main); }
-        .header-title p { color: var(--text-muted); font-size: 14px; font-weight: 600; }
-        .header-controls { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
-        .select-pill, .date-picker { padding: 11px 20px; border-radius: 50px; border: 1.5px solid var(--border); font-weight: 700; font-size: 13px; color: var(--text-main); background: var(--surface); cursor: pointer; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: var(--shadow-subtle); }
-        .select-pill:hover, .date-picker:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); border-color: var(--primary-light); }
-        .select-pill:focus, .date-picker:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15); }
-
-        .dashboard-body { padding: 35px 40px; overflow-y: auto; flex: 1; position: relative; }
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px; margin-bottom: 32px; }
-        .stat-card { 
-            background: var(--surface); padding: 26px; border-radius: var(--radius-lg); 
-            box-shadow: var(--shadow-subtle); display: flex; align-items: center; gap: 20px; 
-            border: 1px solid var(--border); transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-            position: relative; overflow: hidden; z-index: 1;
+        #login-card:hover .brand-icon {
+            transform: rotate(12deg) scale(1.08);
         }
-        .stat-card::before { content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent); transform: skewX(-20deg); transition: 0.7s; z-index: -1; }
-        .stat-card:hover::before { left: 150%; }
-        .stat-card:hover { transform: translateY(-8px) scale(1.02); box-shadow: var(--shadow-hover); border-color: var(--primary-subtle); }
-        
-        .stat-icon { width: 60px; height: 60px; border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 26px; transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
-        .stat-card:hover .stat-icon { transform: scale(1.15) rotate(10deg); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
-        .stat-info h3 { font-size: 34px; font-weight: 800; line-height: 1; margin-bottom: 6px; letter-spacing: -1.2px; }
-        .stat-info p { font-size: 12px; color: var(--text-muted); font-weight: 800; text-transform: uppercase; letter-spacing: 0.9px; }
 
-        .action-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 26px; flex-wrap: wrap; gap: 16px; }
-        .search-bar { background: var(--surface); padding: 13px 22px; border-radius: 50px; border: 1.5px solid var(--border); display: flex; align-items: center; gap: 14px; width: 320px; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: var(--shadow-subtle); }
-        .search-bar:focus-within { border-color: var(--primary); box-shadow: 0 0 0 5px rgba(99, 102, 241, 0.15); transform: translateY(-2px); }
-        .search-bar input { border: none; background: transparent; width: 100%; font-size: 14px; font-weight: 600; color: var(--text-main); }
-        
-        .filter-tabs { display: flex; background: var(--surface); padding: 6px; border-radius: 50px; border: 1.5px solid var(--border); gap: 4px; box-shadow: var(--shadow-subtle); }
-        .filter-btn { padding: 10px 22px; border-radius: 50px; font-size: 13px; font-weight: 800; color: var(--text-muted); background: transparent; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
-        .filter-btn:hover:not(.active) { background: var(--bg-main); color: var(--text-main); transform: scale(1.02); }
-        .filter-btn.active { background: var(--primary-subtle); color: var(--primary); transform: scale(1.06); box-shadow: 0 4px 12px rgba(67, 56, 202, 0.15); }
+        #login-card h2 {
+            font-weight: 800;
+            font-size: 28px;
+            color: var(--text-main);
+            margin-bottom: 6px;
+            letter-spacing: -0.5px;
+        }
 
-        .btn-group { display: flex; gap: 12px; flex-wrap: wrap; }
-        .btn-action { padding: 12px 24px; border-radius: 50px; font-weight: 800; font-size: 13px; display: flex; align-items: center; gap: 9px; border: 1.5px solid var(--border); background: var(--surface); color: var(--text-main); box-shadow: var(--shadow-subtle); position: relative; overflow: hidden; transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); }
-        .btn-action::after { content: ''; position: absolute; width: 100%; height: 100%; top: 0; left: -100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent); transition: 0.5s; }
-        .btn-action:hover::after { left: 100%; }
-        .btn-action:hover { transform: translateY(-4px) scale(1.02); box-shadow: var(--shadow-hover); border-color: var(--primary-light); }
-        .btn-action.success { background: var(--present); color: white; border: none; box-shadow: 0 8px 20px rgba(16, 185, 129, 0.35); }
-        .btn-action.success:hover { box-shadow: 0 12px 28px rgba(16, 185, 129, 0.5); }
-        .btn-action.primary { background: var(--primary); color: white; border: none; box-shadow: 0 8px 20px rgba(67, 56, 202, 0.35); }
-        .btn-action.primary:hover { box-shadow: 0 12px 28px rgba(67, 56, 202, 0.5); }
+        #login-card p {
+            color: var(--text-muted);
+            margin-bottom: 30px;
+            font-size: 14px;
+            font-weight: 600;
+        }
 
-        .table-container { background: var(--surface); border-radius: var(--radius-lg); border: 1px solid var(--border); box-shadow: var(--shadow-subtle); overflow-x: auto; margin-bottom: 30px; transition: 0.3s; }
-        .table-container:hover { box-shadow: var(--shadow-hover); }
-        table { width: 100%; border-collapse: collapse; min-width: 750px; }
-        th { text-align: left; padding: 20px 26px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text-muted); background: var(--bg-main); border-bottom: 2px solid var(--border); backdrop-filter: blur(10px); }
-        td { padding: 18px 26px; border-bottom: 1px solid var(--border); vertical-align: middle; transition: all 0.3s ease; }
-        tr { transition: all 0.3s ease; }
-        tr:last-child td { border-bottom: none; }
-        tr:hover { background: var(--bg-main); transform: scale(1.003); box-shadow: inset 5px 0 0 var(--primary); }
-        
-        .student-cell { display: flex; align-items: center; gap: 16px; }
-        .student-cell h5 { font-size: 15px; font-weight: 800; color: var(--text-main); transition: 0.3s; }
-        tr:hover .student-cell h5 { color: var(--primary); }
-        .student-cell span { font-size: 13px; color: var(--text-light); font-weight: 600; }
+        .login-tabs {
+            display: flex;
+            background: var(--bg-main);
+            border-radius: 50px;
+            padding: 6px;
+            margin-bottom: 28px;
+            border: 1.5px solid var(--border);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
+        }
 
-        .status-badge { display: inline-flex; gap: 6px; background: var(--bg-main); padding: 6px; border-radius: 50px; border: 1.5px solid var(--border); box-shadow: inset 0 2px 5px rgba(0,0,0,0.03); }
-        .status-btn { padding: 7px 16px; border-radius: 22px; font-size: 13px; font-weight: 800; color: var(--text-light); background: transparent; transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); position: relative; }
-        .status-btn:hover:not(.active) { background: var(--border); color: var(--text-main); transform: translateY(-2px) scale(1.05); }
-        .status-btn.active.present { background: var(--present); color: white; box-shadow: 0 6px 16px rgba(16, 185, 129, 0.45); transform: scale(1.08); }
-        .status-btn.active.absent { background: var(--absent); color: white; box-shadow: 0 6px 16px rgba(239, 68, 68, 0.45); transform: scale(1.08); }
-        .status-btn.active.late { background: var(--late); color: white; box-shadow: 0 6px 16px rgba(245, 158, 11, 0.45); transform: scale(1.08); }
-        .status-btn.active.excused { background: var(--excused); color: white; box-shadow: 0 6px 16px rgba(59, 130, 246, 0.45); transform: scale(1.08); }
+        .login-tab {
+            flex: 1;
+            padding: 13px;
+            font-weight: 800;
+            font-size: 13px;
+            border-radius: 50px;
+            color: var(--text-muted);
+            background: transparent;
+            transition: all 0.3s ease;
+        }
 
-        .remark-pill { display: inline-flex; align-items: center; gap: 8px; padding: 7px 16px; border-radius: 22px; font-size: 12px; font-weight: 700; background: var(--surface); border: 1.5px dashed var(--text-light); color: var(--text-muted); cursor: pointer; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
-        .remark-pill:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-subtle); transform: translateY(-3px) scale(1.03); box-shadow: var(--shadow-subtle); border-style: solid; }
+        .login-tab.active {
+            background: var(--surface);
+            color: var(--primary);
+            box-shadow: 0 6px 20px rgba(67, 56, 202, 0.15);
+            transform: scale(1.03);
+        }
 
-        .crud-actions { display: flex; gap: 10px; justify-content: flex-end; }
-        .crud-btn { width: 38px; height: 38px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 14px; background: var(--surface); color: var(--text-muted); border: 1.5px solid var(--border); box-shadow: var(--shadow-subtle); transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); }
-        .crud-btn:hover.edit { background: var(--secondary); color: white; border-color: var(--secondary); transform: translateY(-4px) rotate(8deg) scale(1.08); box-shadow: 0 8px 20px rgba(2, 132, 199, 0.35); }
-        .crud-btn:hover.delete { background: var(--absent); color: white; border-color: var(--absent); transform: translateY(-4px) rotate(-8deg) scale(1.08); box-shadow: 0 8px 20px rgba(239, 68, 68, 0.35); }
+        .input-group {
+            text-align: left;
+            margin-bottom: 22px;
+            position: relative;
+        }
 
-        .health-badge { padding: 7px 14px; border-radius: 12px; font-size: 12px; font-weight: 800; display: inline-flex; align-items: center; gap: 7px; transition: 0.3s; }
-        .health-badge.at-risk { animation: pulseGlow 2s infinite; }
+        .input-group label {
+            display: block;
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
 
-        .chart-card { background: var(--surface); padding: 35px; border-radius: var(--radius-lg); border: 1px solid var(--border); box-shadow: var(--shadow-subtle); height: 420px; transition: all 0.4s ease; }
-        .chart-card:hover { box-shadow: var(--shadow-hover); transform: translateY(-4px); }
+        .input-group input,
+        .input-group select {
+            width: 100%;
+            padding: 15px 16px 15px 46px;
+            border: 2px solid var(--border);
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            background: var(--bg-main);
+            color: var(--text-main);
+        }
 
-        .settings-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 24px; max-width: 1100px; margin: 0 auto; }
-        .settings-card { background: var(--surface); padding: 32px; border-radius: var(--radius-lg); border: 1px solid var(--border); box-shadow: var(--shadow-subtle); transition: 0.3s; }
-        .settings-card:hover { box-shadow: var(--shadow-hover); transform: translateY(-3px); }
-        .settings-card h3 { font-size: 18px; font-weight: 800; color: var(--text-main); margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
-        .settings-card p { font-size: 13px; color: var(--text-muted); margin-bottom: 22px; font-weight: 500; }
-        
-        .toggle-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); }
-        .toggle-row:last-child { border-bottom: none; }
-        .toggle-label span { display: block; font-size: 14px; font-weight: 700; color: var(--text-main); }
-        .toggle-label small { font-size: 12px; color: var(--text-muted); }
-        
-        .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #CBD5E1; transition: .4s; border-radius: 34px; }
-        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
-        input:checked + .slider { background-color: var(--primary); }
-        input:checked + .slider:before { transform: translateX(24px); }
+        .input-group input:focus,
+        .input-group select:focus {
+            border-color: var(--primary);
+            background: var(--surface);
+            box-shadow: 0 0 0 5px rgba(99, 102, 241, 0.15);
+            transform: translateY(-1px);
+        }
 
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 2000; transition: 0.3s; }
-        .modal-overlay.active { display: flex; animation: fadeIn 0.3s forwards; }
-        .modal-card { background: var(--surface); padding: 40px; border-radius: var(--radius-lg); width: 100%; max-width: 460px; box-shadow: 0 30px 60px rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.8); transform: scale(0.85); opacity: 0; }
-        .modal-overlay.active .modal-card { animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
-        .modal-card h3 { font-size: 24px; margin-bottom: 12px; font-weight: 800; letter-spacing: -0.6px; color: var(--text-main); }
-        .modal-footer { display: flex; justify-content: flex-end; gap: 12px; margin-top: 30px; }
+        .input-group i {
+            position: absolute;
+            left: 16px;
+            top: 41px;
+            color: var(--text-light);
+            font-size: 16px;
+            transition: 0.3s;
+        }
+
+        .input-group input:focus+i,
+        .input-group input:focus~i {
+            color: var(--primary);
+        }
+
+        .form-links {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 26px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .form-links a {
+            color: var(--primary);
+            text-decoration: none;
+            position: relative;
+        }
+
+        .form-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0%;
+            height: 2px;
+            background: var(--primary);
+            transition: width 0.3s ease;
+        }
+
+        .form-links a:hover::after {
+            width: 100%;
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            font-weight: 800;
+            border-radius: var(--radius-md);
+            font-size: 15px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 12px 30px rgba(67, 56, 202, 0.35);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transform: skewX(-20deg);
+            transition: 0.6s;
+        }
+
+        .btn-primary:hover::before {
+            left: 150%;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-4px) scale(1.01);
+            box-shadow: 0 18px 40px rgba(67, 56, 202, 0.45);
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            color: var(--text-muted);
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            background: var(--bg-main);
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--border);
+        }
+
+        .back-btn:hover {
+            background: var(--primary-subtle);
+            color: var(--primary);
+            transform: translateX(-4px) scale(1.05);
+            border-color: var(--primary-light);
+        }
+
+        #app-screen {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 290px;
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            padding: 35px 25px;
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+            box-shadow: var(--shadow-subtle);
+        }
+
+        .brand {
+            font-size: 26px;
+            font-weight: 800;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 40px;
+            letter-spacing: -0.8px;
+        }
+
+        .brand i {
+            font-size: 30px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px 20px;
+            border-radius: var(--radius-md);
+            color: var(--text-muted);
+            font-weight: 700;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            margin-bottom: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-link:hover {
+            background: var(--bg-main);
+            color: var(--primary);
+            transform: translateX(6px);
+        }
+
+        .nav-link.active {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 10px 25px rgba(67, 56, 202, 0.3);
+            transform: scale(1.02);
+        }
+
+        .user-profile {
+            margin-top: auto;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            background: var(--bg-main);
+            padding: 16px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+        }
+
+        .user-avatar {
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 16px;
+            box-shadow: 0 6px 18px rgba(67, 56, 202, 0.3);
+        }
+
+        .user-info h4 {
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .user-info span {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .edit-profile-btn {
+            color: var(--text-light);
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 13px;
+        }
+
+        .edit-profile-btn:hover {
+            color: var(--primary);
+            transform: rotate(20deg) scale(1.2);
+        }
+
+        .logout-btn {
+            color: var(--absent);
+            background: var(--surface);
+            width: 40px;
+            height: 40px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            margin-left: auto;
+            cursor: pointer;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .logout-btn:hover {
+            background: var(--absent);
+            color: white;
+            box-shadow: 0 8px 20px rgba(239, 68, 68, 0.4);
+            transform: rotate(-15deg) scale(1.05);
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background: var(--bg-main);
+        }
+
+        .top-header {
+            background: var(--surface);
+            backdrop-filter: blur(20px);
+            padding: 22px 40px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            z-index: 50;
+            box-shadow: var(--shadow-subtle);
+        }
+
+        .header-title h1 {
+            font-size: 26px;
+            font-weight: 800;
+            letter-spacing: -0.8px;
+            color: var(--text-main);
+        }
+
+        .header-title p {
+            color: var(--text-muted);
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .select-pill,
+        .date-picker {
+            padding: 11px 20px;
+            border-radius: 50px;
+            border: 1.5px solid var(--border);
+            font-weight: 700;
+            font-size: 13px;
+            color: var(--text-main);
+            background: var(--surface);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: var(--shadow-subtle);
+        }
+
+        .select-pill:hover,
+        .date-picker:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+            border-color: var(--primary-light);
+        }
+
+        .select-pill:focus,
+        .date-picker:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+        }
+
+        .dashboard-body {
+            padding: 35px 40px;
+            overflow-y: auto;
+            flex: 1;
+            position: relative;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            padding: 26px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-subtle);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            border: 1px solid var(--border);
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+            transform: skewX(-20deg);
+            transition: 0.7s;
+            z-index: -1;
+        }
+
+        .stat-card:hover::before {
+            left: 150%;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: var(--shadow-hover);
+            border-color: var(--primary-subtle);
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .stat-card:hover .stat-icon {
+            transform: scale(1.15) rotate(10deg);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-info h3 {
+            font-size: 34px;
+            font-weight: 800;
+            line-height: 1;
+            margin-bottom: 6px;
+            letter-spacing: -1.2px;
+        }
+
+        .stat-info p {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.9px;
+        }
+
+        .action-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 26px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .search-bar {
+            background: var(--surface);
+            padding: 13px 22px;
+            border-radius: 50px;
+            border: 1.5px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            width: 320px;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: var(--shadow-subtle);
+        }
+
+        .search-bar:focus-within {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 5px rgba(99, 102, 241, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .search-bar input {
+            border: none;
+            background: transparent;
+            width: 100%;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .filter-tabs {
+            display: flex;
+            background: var(--surface);
+            padding: 6px;
+            border-radius: 50px;
+            border: 1.5px solid var(--border);
+            gap: 4px;
+            box-shadow: var(--shadow-subtle);
+        }
+
+        .filter-btn {
+            padding: 10px 22px;
+            border-radius: 50px;
+            font-size: 13px;
+            font-weight: 800;
+            color: var(--text-muted);
+            background: transparent;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .filter-btn:hover:not(.active) {
+            background: var(--bg-main);
+            color: var(--text-main);
+            transform: scale(1.02);
+        }
+
+        .filter-btn.active {
+            background: var(--primary-subtle);
+            color: var(--primary);
+            transform: scale(1.06);
+            box-shadow: 0 4px 12px rgba(67, 56, 202, 0.15);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn-action {
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-weight: 800;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            border: 1.5px solid var(--border);
+            background: var(--surface);
+            color: var(--text-main);
+            box-shadow: var(--shadow-subtle);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .btn-action::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: -100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: 0.5s;
+        }
+
+        .btn-action:hover::after {
+            left: 100%;
+        }
+
+        .btn-action:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: var(--shadow-hover);
+            border-color: var(--primary-light);
+        }
+
+        .btn-action.success {
+            background: var(--present);
+            color: white;
+            border: none;
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.35);
+        }
+
+        .btn-action.success:hover {
+            box-shadow: 0 12px 28px rgba(16, 185, 129, 0.5);
+        }
+
+        .btn-action.primary {
+            background: var(--primary);
+            color: white;
+            border: none;
+            box-shadow: 0 8px 20px rgba(67, 56, 202, 0.35);
+        }
+
+        .btn-action.primary:hover {
+            box-shadow: 0 12px 28px rgba(67, 56, 202, 0.5);
+        }
+
+        .table-container {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-subtle);
+            overflow-x: auto;
+            margin-bottom: 30px;
+            transition: 0.3s;
+        }
+
+        .table-container:hover {
+            box-shadow: var(--shadow-hover);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 750px;
+        }
+
+        th {
+            text-align: left;
+            padding: 20px 26px;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: var(--text-muted);
+            background: var(--bg-main);
+            border-bottom: 2px solid var(--border);
+            backdrop-filter: blur(10px);
+        }
+
+        td {
+            padding: 18px 26px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+            transition: all 0.3s ease;
+        }
+
+        tr {
+            transition: all 0.3s ease;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background: var(--bg-main);
+            transform: scale(1.003);
+            box-shadow: inset 5px 0 0 var(--primary);
+        }
+
+        .student-cell {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .student-cell h5 {
+            font-size: 15px;
+            font-weight: 800;
+            color: var(--text-main);
+            transition: 0.3s;
+        }
+
+        tr:hover .student-cell h5 {
+            color: var(--primary);
+        }
+
+        .student-cell span {
+            font-size: 13px;
+            color: var(--text-light);
+            font-weight: 600;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            gap: 6px;
+            background: var(--bg-main);
+            padding: 6px;
+            border-radius: 50px;
+            border: 1.5px solid var(--border);
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.03);
+        }
+
+        .status-btn {
+            padding: 7px 16px;
+            border-radius: 22px;
+            font-size: 13px;
+            font-weight: 800;
+            color: var(--text-light);
+            background: transparent;
+            transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+        }
+
+        .status-btn:hover:not(.active) {
+            background: var(--border);
+            color: var(--text-main);
+            transform: translateY(-2px) scale(1.05);
+        }
+
+        .status-btn.active.present {
+            background: var(--present);
+            color: white;
+            box-shadow: 0 6px 16px rgba(16, 185, 129, 0.45);
+            transform: scale(1.08);
+        }
+
+        .status-btn.active.absent {
+            background: var(--absent);
+            color: white;
+            box-shadow: 0 6px 16px rgba(239, 68, 68, 0.45);
+            transform: scale(1.08);
+        }
+
+        .status-btn.active.late {
+            background: var(--late);
+            color: white;
+            box-shadow: 0 6px 16px rgba(245, 158, 11, 0.45);
+            transform: scale(1.08);
+        }
+
+        .status-btn.active.excused {
+            background: var(--excused);
+            color: white;
+            box-shadow: 0 6px 16px rgba(59, 130, 246, 0.45);
+            transform: scale(1.08);
+        }
+
+        .remark-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 16px;
+            border-radius: 22px;
+            font-size: 12px;
+            font-weight: 700;
+            background: var(--surface);
+            border: 1.5px dashed var(--text-light);
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .remark-pill:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: var(--primary-subtle);
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: var(--shadow-subtle);
+            border-style: solid;
+        }
+
+        .crud-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .crud-btn {
+            width: 38px;
+            height: 38px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            background: var(--surface);
+            color: var(--text-muted);
+            border: 1.5px solid var(--border);
+            box-shadow: var(--shadow-subtle);
+            transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .crud-btn:hover.edit {
+            background: var(--secondary);
+            color: white;
+            border-color: var(--secondary);
+            transform: translateY(-4px) rotate(8deg) scale(1.08);
+            box-shadow: 0 8px 20px rgba(2, 132, 199, 0.35);
+        }
+
+        .crud-btn:hover.delete {
+            background: var(--absent);
+            color: white;
+            border-color: var(--absent);
+            transform: translateY(-4px) rotate(-8deg) scale(1.08);
+            box-shadow: 0 8px 20px rgba(239, 68, 68, 0.35);
+        }
+
+        .health-badge {
+            padding: 7px 14px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 800;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            transition: 0.3s;
+        }
+
+        .health-badge.at-risk {
+            animation: pulseGlow 2s infinite;
+        }
+
+        .chart-card {
+            background: var(--surface);
+            padding: 35px;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-subtle);
+            height: 420px;
+            transition: all 0.4s ease;
+        }
+
+        .chart-card:hover {
+            box-shadow: var(--shadow-hover);
+            transform: translateY(-4px);
+        }
+
+        .settings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            gap: 24px;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .settings-card {
+            background: var(--surface);
+            padding: 32px;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-subtle);
+            transition: 0.3s;
+        }
+
+        .settings-card:hover {
+            box-shadow: var(--shadow-hover);
+            transform: translateY(-3px);
+        }
+
+        .settings-card h3 {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--text-main);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .settings-card p {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 22px;
+            font-weight: 500;
+        }
+
+        .toggle-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .toggle-row:last-child {
+            border-bottom: none;
+        }
+
+        .toggle-label span {
+            display: block;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .toggle-label small {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 26px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #CBD5E1;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked+.slider {
+            background-color: var(--primary);
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(24px);
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            transition: 0.3s;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            animation: fadeIn 0.3s forwards;
+        }
+
+        .modal-card {
+            background: var(--surface);
+            padding: 40px;
+            border-radius: var(--radius-lg);
+            width: 100%;
+            max-width: 460px;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.35);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            transform: scale(0.85);
+            opacity: 0;
+        }
+
+        .modal-overlay.active .modal-card {
+            animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        .modal-card h3 {
+            font-size: 24px;
+            margin-bottom: 12px;
+            font-weight: 800;
+            letter-spacing: -0.6px;
+            color: var(--text-main);
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 30px;
+        }
 
         .toast {
-            position: fixed; bottom: 35px; right: 35px; background: #0F172A; color: white;
-            padding: 18px 26px; border-radius: var(--radius-md); font-weight: 700; font-size: 14px;
-            display: flex; align-items: center; gap: 14px; box-shadow: 0 25px 50px rgba(15, 23, 42, 0.4);
-            transform: translateY(140px) scale(0.9); opacity: 0; transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); z-index: 3000;
+            position: fixed;
+            bottom: 35px;
+            right: 35px;
+            background: #0F172A;
+            color: white;
+            padding: 18px 26px;
+            border-radius: var(--radius-md);
+            font-weight: 700;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            box-shadow: 0 25px 50px rgba(15, 23, 42, 0.4);
+            transform: translateY(140px) scale(0.9);
+            opacity: 0;
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            z-index: 3000;
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
-        .toast.show { transform: translateY(0) scale(1); opacity: 1; }
-        .toast i { color: var(--present); font-size: 22px; filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.5)); }
+
+        .toast.show {
+            transform: translateY(0) scale(1);
+            opacity: 1;
+        }
+
+        .toast i {
+            color: var(--present);
+            font-size: 22px;
+            filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.5));
+        }
 
         @media print {
-            .sidebar, .top-header, .action-toolbar, .crud-actions, .status-badge { display: none !important; }
-            .main-content, .dashboard-body { padding: 0 !important; overflow: visible !important; }
-            .table-container { border: none !important; box-shadow: none !important; }
-            body { background: white !important; }
+
+            .sidebar,
+            .top-header,
+            .action-toolbar,
+            .crud-actions,
+            .status-badge {
+                display: none !important;
+            }
+
+            .main-content,
+            .dashboard-body {
+                padding: 0 !important;
+                overflow: visible !important;
+            }
+
+            .table-container {
+                border: none !important;
+                box-shadow: none !important;
+            }
+
+            body {
+                background: white !important;
+            }
         }
 
-        .mobile-menu-btn { display: none; font-size: 24px; color: var(--primary); background: transparent; }
-        @media(max-width: 900px) {
-            .purpose-grid { grid-template-columns: repeat(2, 1fr); }
-            .sidebar { position: fixed; left: -310px; height: 100vh; box-shadow: var(--shadow-hover); transition: 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
-            .sidebar.open { left: 0; }
-            .mobile-menu-btn { display: block; }
-            .top-header { padding: 18px 25px; }
-            .dashboard-body { padding: 22px 25px; }
-            .action-toolbar { flex-direction: column; align-items: stretch; }
-            .search-bar { width: 100%; }
-            .filter-tabs { overflow-x: auto; padding-bottom: 5px; }
+        .mobile-menu-btn {
+            display: none;
+            font-size: 24px;
+            color: var(--primary);
+            background: transparent;
         }
+
+        @media(max-width: 900px) {
+            .purpose-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .sidebar {
+                position: fixed;
+                left: -310px;
+                height: 100vh;
+                box-shadow: var(--shadow-hover);
+                transition: 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            }
+
+            .sidebar.open {
+                left: 0;
+            }
+
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .top-header {
+                padding: 18px 25px;
+            }
+
+            .dashboard-body {
+                padding: 22px 25px;
+            }
+
+            .action-toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-bar {
+                width: 100%;
+            }
+
+            .filter-tabs {
+                overflow-x: auto;
+                padding-bottom: 5px;
+            }
+        }
+
         @media(max-width: 600px) {
-            .purpose-grid { grid-template-columns: 1fr; }
+            .purpose-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
+
 <body>
 
     <!-- ================= IMMERSIVE LOGIN SCREEN ================= -->
@@ -321,7 +1488,7 @@
                 <h2>Welcome to EduPro</h2>
                 <p>Select your workspace environment to continue</p>
             </div>
-            
+
             <div class="purpose-grid">
                 <div class="purpose-option" onclick="selectWorkspace('School')">
                     <div class="purpose-icon"><i class="fa-solid fa-school"></i></div>
@@ -358,14 +1525,17 @@
 
         <!-- 2. Login Screen -->
         <div class="glass-card hidden" id="login-card">
-            <button type="button" class="back-btn" onclick="backToPurpose()"><i class="fa-solid fa-arrow-left"></i></button>
+            <button type="button" class="back-btn" onclick="backToPurpose()"><i
+                    class="fa-solid fa-arrow-left"></i></button>
             <div class="brand-icon"><i class="fa-solid fa-fingerprint"></i></div>
             <h2>EduPro Security</h2>
             <p id="login-subtitle">Smart Attendance Management</p>
-            
+
             <div class="login-tabs">
-                <button type="button" class="login-tab active" id="tab-1-text" onclick="switchMainTab('teacher')">Class Teacher</button>
-                <button type="button" class="login-tab" id="tab-2-text" onclick="switchMainTab('principal')">Admin</button>
+                <button type="button" class="login-tab active" id="tab-1-text" onclick="switchMainTab('teacher')">Class
+                    Teacher</button>
+                <button type="button" class="login-tab" id="tab-2-text"
+                    onclick="switchMainTab('principal')">Admin</button>
             </div>
 
             <!-- TEACHER/MEMBER AUTHENTICATION -->
@@ -380,7 +1550,8 @@
                     <div class="input-group">
                         <label>Password</label>
                         <i class="fa-solid fa-lock"></i>
-                        <input type="password" id="t-pass-login" required placeholder="••••••••" autocomplete="current-password">
+                        <input type="password" id="t-pass-login" required placeholder="••••••••"
+                            autocomplete="current-password">
                     </div>
                     <div class="form-links">
                         <a href="#" onclick="switchTeacherView('forgot')">Forgot Password?</a>
@@ -404,33 +1575,42 @@
                     <div class="input-group">
                         <label>Recovery Email</label>
                         <i class="fa-solid fa-envelope"></i>
-                        <input type="email" id="t-email-reg" required placeholder="name@domain.com" autocomplete="email">
+                        <input type="email" id="t-email-reg" required placeholder="name@domain.com"
+                            autocomplete="email">
                     </div>
                     <div class="input-group">
                         <label>Set Password</label>
                         <i class="fa-solid fa-key"></i>
-                        <input type="password" id="t-pass-reg" required placeholder="••••••••" autocomplete="new-password">
+                        <input type="password" id="t-pass-reg" required placeholder="••••••••"
+                            autocomplete="new-password">
                     </div>
                     <div class="form-links" style="justify-content: center;">
-                        <a href="#" onclick="switchTeacherView('login')"><i class="fa-solid fa-arrow-left"></i> Back to Sign In</a>
+                        <a href="#" onclick="switchTeacherView('login')"><i class="fa-solid fa-arrow-left"></i> Back to
+                            Sign In</a>
                     </div>
-                    <button type="submit" class="btn-primary" style="background: var(--present);">Register <i class="fa-solid fa-check"></i></button>
+                    <button type="submit" class="btn-primary" style="background: var(--present);">Register <i
+                            class="fa-solid fa-check"></i></button>
                 </form>
 
                 <!-- Forgot Password -->
                 <form id="t-forgot-form" class="hidden fade-in" onsubmit="handleTeacherForgot(event)">
-                    <p style="font-size: 12px; color: var(--late); background: var(--late-bg); padding: 12px; border-radius: 12px; margin-bottom: 22px; font-weight: 700; border: 1px solid rgba(245, 158, 11, 0.3);">
-                        <i class="fa-solid fa-shield-halved"></i> Don't worry! Password reset will NOT erase your roster or records.
+                    <p
+                        style="font-size: 12px; color: var(--late); background: var(--late-bg); padding: 12px; border-radius: 12px; margin-bottom: 22px; font-weight: 700; border: 1px solid rgba(245, 158, 11, 0.3);">
+                        <i class="fa-solid fa-shield-halved"></i> Don't worry! Password reset will NOT erase your roster
+                        or records.
                     </p>
                     <div class="input-group">
                         <label>Registered Recovery Email</label>
                         <i class="fa-solid fa-envelope"></i>
-                        <input type="email" id="t-email-forgot" required placeholder="name@domain.com" autocomplete="email">
+                        <input type="email" id="t-email-forgot" required placeholder="name@domain.com"
+                            autocomplete="email">
                     </div>
                     <div class="form-links" style="justify-content: center;">
-                        <a href="#" onclick="switchTeacherView('login')"><i class="fa-solid fa-arrow-left"></i> Back to Sign In</a>
+                        <a href="#" onclick="switchTeacherView('login')"><i class="fa-solid fa-arrow-left"></i> Back to
+                            Sign In</a>
                     </div>
-                    <button type="submit" class="btn-primary" style="background: var(--late);">Send Reset Link <i class="fa-solid fa-paper-plane"></i></button>
+                    <button type="submit" class="btn-primary" style="background: var(--late);">Send Reset Link <i
+                            class="fa-solid fa-paper-plane"></i></button>
                 </form>
             </div>
 
@@ -446,20 +1626,21 @@
                     <i class="fa-solid fa-key"></i>
                     <input type="password" id="p-pass" required placeholder="••••••••" autocomplete="current-password">
                 </div>
-                <button type="submit" class="btn-primary" style="background: #0F172A; margin-top: 15px;">Master Access <i class="fa-solid fa-shield-halved"></i></button>
+                <button type="submit" class="btn-primary" style="background: #0F172A; margin-top: 15px;">Master Access
+                    <i class="fa-solid fa-shield-halved"></i></button>
             </form>
         </div>
     </div>
 
     <!-- ================= MAIN DASHBOARD WORKSPACE ================= -->
     <div id="app-screen" class="hidden">
-        
+
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
             <div class="brand">
                 <i class="fa-solid fa-graduation-cap" id="sidebar-brand-icon"></i> EduPro
             </div>
-            
+
             <!-- Standard Teacher Navigation -->
             <nav id="teacher-nav">
                 <div class="nav-link active" onclick="switchDashboardView('register')" id="nav-register">
@@ -488,28 +1669,31 @@
                     <i class="fa-solid fa-lock"></i> Settings Hub
                 </div>
             </nav>
-            
+
             <div class="user-profile">
                 <div class="user-avatar" id="nav-avatar">T</div>
                 <div class="user-info">
-                    <h4><span id="nav-name">Manager</span> <i class="fa-solid fa-pen edit-profile-btn" onclick="openProfileModal()" title="Edit Profile"></i></h4>
+                    <h4><span id="nav-name">Manager</span> <i class="fa-solid fa-pen edit-profile-btn"
+                            onclick="openProfileModal()" title="Edit Profile"></i></h4>
                     <span id="nav-role">Admin</span>
                 </div>
-                <button type="button" class="logout-btn" onclick="logout()" title="Logout"><i class="fa-solid fa-right-from-bracket"></i></button>
+                <button type="button" class="logout-btn" onclick="logout()" title="Logout"><i
+                        class="fa-solid fa-right-from-bracket"></i></button>
             </div>
         </aside>
 
         <!-- Main Workspace -->
         <main class="main-content">
-            
+
             <!-- Top Header -->
             <header class="top-header">
-                <button type="button" class="mobile-menu-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+                <button type="button" class="mobile-menu-btn" onclick="toggleSidebar()"><i
+                        class="fa-solid fa-bars"></i></button>
                 <div class="header-title">
                     <h1 id="viewing-class-title">Group Attendance</h1>
                     <p id="header-subtitle">Manage daily attendance and status.</p>
                 </div>
-                
+
                 <div class="header-controls">
                     <select class="select-pill" id="session-selector" onchange="renderCurrentView()">
                         <option value="Morning Session">Morning Session</option>
@@ -518,9 +1702,10 @@
                     </select>
 
                     <input type="date" class="date-picker" id="attendance-date" onchange="handleDateChange()">
-                    
+
                     <div class="class-selector hidden" id="principal-controls">
-                        <select class="select-pill" id="class-dropdown" onchange="changeClassView()" style="background: var(--primary-subtle); color: var(--primary); border-color: transparent;">
+                        <select class="select-pill" id="class-dropdown" onchange="changeClassView()"
+                            style="background: var(--primary-subtle); color: var(--primary); border-color: transparent;">
                         </select>
                     </div>
                 </div>
@@ -530,27 +1715,44 @@
             <div class="dashboard-body fade-in" id="view-register">
                 <div class="stats-grid">
                     <div class="stat-card">
-                        <div class="stat-icon" style="background: var(--primary-subtle); color: var(--primary);"><i class="fa-solid fa-users"></i></div>
-                        <div class="stat-info"><h3 id="stat-total">0</h3><p id="lbl-total">Total Persons</p></div>
+                        <div class="stat-icon" style="background: var(--primary-subtle); color: var(--primary);"><i
+                                class="fa-solid fa-users"></i></div>
+                        <div class="stat-info">
+                            <h3 id="stat-total">0</h3>
+                            <p id="lbl-total">Total Persons</p>
+                        </div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-icon" style="background: var(--present-bg); color: var(--present);"><i class="fa-solid fa-user-check"></i></div>
-                        <div class="stat-info"><h3 id="stat-present">0</h3><p>Present</p></div>
+                        <div class="stat-icon" style="background: var(--present-bg); color: var(--present);"><i
+                                class="fa-solid fa-user-check"></i></div>
+                        <div class="stat-info">
+                            <h3 id="stat-present">0</h3>
+                            <p>Present</p>
+                        </div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-icon" style="background: var(--absent-bg); color: var(--absent);"><i class="fa-solid fa-user-xmark"></i></div>
-                        <div class="stat-info"><h3 id="stat-absent">0</h3><p>Absent</p></div>
+                        <div class="stat-icon" style="background: var(--absent-bg); color: var(--absent);"><i
+                                class="fa-solid fa-user-xmark"></i></div>
+                        <div class="stat-info">
+                            <h3 id="stat-absent">0</h3>
+                            <p>Absent</p>
+                        </div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-icon" style="background: var(--late-bg); color: var(--late);"><i class="fa-solid fa-clock"></i></div>
-                        <div class="stat-info"><h3 id="stat-late">0</h3><p>Late / Excused</p></div>
+                        <div class="stat-icon" style="background: var(--late-bg); color: var(--late);"><i
+                                class="fa-solid fa-clock"></i></div>
+                        <div class="stat-info">
+                            <h3 id="stat-late">0</h3>
+                            <p>Late / Excused</p>
+                        </div>
                     </div>
                 </div>
 
                 <div class="action-toolbar">
                     <div class="search-bar">
                         <i class="fa-solid fa-search" style="color: var(--text-light);"></i>
-                        <input type="text" id="search-box-register" placeholder="Search name or ID..." onkeyup="renderRegisterTable()" autocomplete="off">
+                        <input type="text" id="search-box-register" placeholder="Search name or ID..."
+                            onkeyup="renderRegisterTable()" autocomplete="off">
                     </div>
 
                     <div class="filter-tabs">
@@ -561,11 +1763,17 @@
                     </div>
 
                     <div class="btn-group">
-                        <button type="button" class="btn-action primary" onclick="openStudentModal('add')"><i class="fa-solid fa-plus"></i> Add New</button>
-                        <button type="button" class="btn-action" onclick="openBulkModal()" style="background: var(--secondary); color: white; border: none;"><i class="fa-solid fa-list-check"></i> Batch Import</button>
-                        <button type="button" class="btn-action success" onclick="markAll('present')"><i class="fa-solid fa-check-double"></i> All Present</button>
-                        <button type="button" class="btn-action" onclick="downloadCSV()"><i class="fa-solid fa-file-csv"></i> Export CSV</button>
-                        <button type="button" class="btn-action primary" onclick="downloadPDF()" style="background: #4F46E5;"><i class="fa-solid fa-file-pdf"></i> Export PDF Report</button>
+                        <button type="button" class="btn-action primary" onclick="openStudentModal('add')"><i
+                                class="fa-solid fa-plus"></i> Add New</button>
+                        <button type="button" class="btn-action" onclick="openBulkModal()"
+                            style="background: var(--secondary); color: white; border: none;"><i
+                                class="fa-solid fa-list-check"></i> Batch Import</button>
+                        <button type="button" class="btn-action success" onclick="markAll('present')"><i
+                                class="fa-solid fa-check-double"></i> All Present</button>
+                        <button type="button" class="btn-action" onclick="downloadCSV()"><i
+                                class="fa-solid fa-file-csv"></i> Export CSV</button>
+                        <button type="button" class="btn-action primary" onclick="downloadPDF()"
+                            style="background: #4F46E5;"><i class="fa-solid fa-file-pdf"></i> Export PDF Report</button>
                     </div>
                 </div>
 
@@ -587,15 +1795,23 @@
 
             <!-- ================= VIEW 1.5: MONTHLY CALENDAR ================= -->
             <div class="dashboard-body fade-in hidden" id="view-calendar">
-                <div style="background: var(--surface); border-radius: var(--radius-lg); border: 1px solid var(--border); box-shadow: var(--shadow-subtle); padding: 35px; max-width: 900px; margin: 0 auto;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                <div
+                    style="background: var(--surface); border-radius: var(--radius-lg); border: 1px solid var(--border); box-shadow: var(--shadow-subtle); padding: 35px; max-width: 900px; margin: 0 auto;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
                         <div>
-                            <h3 id="cal-month-title" style="font-size: 24px; font-weight: 800; color: var(--text-main);">August 2026</h3>
-                            <p style="font-size: 13px; color: var(--text-muted); font-weight: 600;">Select any date to instantly view and manage that day's attendance log.</p>
+                            <h3 id="cal-month-title"
+                                style="font-size: 24px; font-weight: 800; color: var(--text-main);">August 2026</h3>
+                            <p style="font-size: 13px; color: var(--text-muted); font-weight: 600;">Select any date to
+                                instantly view and manage that day's attendance log.</p>
                         </div>
                         <div style="display: flex; gap: 10px;">
-                            <button type="button" class="btn-action" onclick="event.preventDefault(); changeCalendarMonth(-1); return false;"><i class="fa-solid fa-chevron-left"></i></button>
-                            <button type="button" class="btn-action primary" onclick="event.preventDefault(); changeCalendarMonth(1); return false;">Next <i class="fa-solid fa-chevron-right"></i></button>
+                            <button type="button" class="btn-action"
+                                onclick="event.preventDefault(); changeCalendarMonth(-1); return false;"><i
+                                    class="fa-solid fa-chevron-left"></i></button>
+                            <button type="button" class="btn-action primary"
+                                onclick="event.preventDefault(); changeCalendarMonth(1); return false;">Next <i
+                                    class="fa-solid fa-chevron-right"></i></button>
                         </div>
                     </div>
 
@@ -608,10 +1824,11 @@
                 <div class="action-toolbar">
                     <div class="search-bar">
                         <i class="fa-solid fa-search" style="color: var(--text-light);"></i>
-                        <input type="text" id="search-box-directory" placeholder="Search directory..." onkeyup="renderDirectoryTable()" autocomplete="off">
+                        <input type="text" id="search-box-directory" placeholder="Search directory..."
+                            onkeyup="renderDirectoryTable()" autocomplete="off">
                     </div>
                 </div>
-                
+
                 <div class="table-container">
                     <table>
                         <thead>
@@ -632,19 +1849,31 @@
             <div class="dashboard-body fade-in hidden" id="view-analytics">
                 <div class="stats-grid">
                     <div class="stat-card">
-                        <div class="stat-icon" style="background: var(--primary-subtle); color: var(--primary);"><i class="fa-solid fa-chart-line"></i></div>
-                        <div class="stat-info"><h3 id="analytics-avg">0%</h3><p>Group Average</p></div>
+                        <div class="stat-icon" style="background: var(--primary-subtle); color: var(--primary);"><i
+                                class="fa-solid fa-chart-line"></i></div>
+                        <div class="stat-info">
+                            <h3 id="analytics-avg">0%</h3>
+                            <p>Group Average</p>
+                        </div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-icon" style="background: var(--present-bg); color: var(--present);"><i class="fa-solid fa-award"></i></div>
-                        <div class="stat-info"><h3 id="analytics-best">--</h3><p>Top Performer</p></div>
+                        <div class="stat-icon" style="background: var(--present-bg); color: var(--present);"><i
+                                class="fa-solid fa-award"></i></div>
+                        <div class="stat-info">
+                            <h3 id="analytics-best">--</h3>
+                            <p>Top Performer</p>
+                        </div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-icon" style="background: var(--absent-bg); color: var(--absent);"><i class="fa-solid fa-triangle-exclamation"></i></div>
-                        <div class="stat-info"><h3 id="analytics-worst">--</h3><p>Attention Needed</p></div>
+                        <div class="stat-icon" style="background: var(--absent-bg); color: var(--absent);"><i
+                                class="fa-solid fa-triangle-exclamation"></i></div>
+                        <div class="stat-info">
+                            <h3 id="analytics-worst">--</h3>
+                            <p>Attention Needed</p>
+                        </div>
                     </div>
                 </div>
-                
+
                 <div class="chart-card">
                     <canvas id="attendanceChart"></canvas>
                 </div>
@@ -654,30 +1883,36 @@
             <div class="dashboard-body fade-in hidden" id="view-settings">
                 <div class="settings-grid">
                     <div class="settings-card">
-                        <h3><i class="fa-solid fa-shield-halved" style="color: var(--primary);"></i> Security & Passwords</h3>
+                        <h3><i class="fa-solid fa-shield-halved" style="color: var(--primary);"></i> Security &
+                            Passwords</h3>
                         <p>Update your active group authentication password.</p>
                         <form onsubmit="handlePasswordChange(event)" id="password-change-form">
                             <div class="input-group">
                                 <label>Current Password</label>
                                 <i class="fa-solid fa-lock-open"></i>
-                                <input type="password" id="set-current-pass" required placeholder="Current password" autocomplete="current-password">
+                                <input type="password" id="set-current-pass" required placeholder="Current password"
+                                    autocomplete="current-password">
                             </div>
                             <div class="input-group">
                                 <label>New Password</label>
                                 <i class="fa-solid fa-lock"></i>
-                                <input type="password" id="set-new-pass" required placeholder="New password" autocomplete="new-password">
+                                <input type="password" id="set-new-pass" required placeholder="New password"
+                                    autocomplete="new-password">
                             </div>
                             <div class="input-group">
                                 <label>Confirm New Password</label>
                                 <i class="fa-solid fa-check-double"></i>
-                                <input type="password" id="set-confirm-pass" required placeholder="Confirm password" autocomplete="new-password">
+                                <input type="password" id="set-confirm-pass" required placeholder="Confirm password"
+                                    autocomplete="new-password">
                             </div>
-                            <button type="submit" class="btn-action primary" style="width: 100%; justify-content: center; margin-top: 10px;">Update Password</button>
+                            <button type="submit" class="btn-action primary"
+                                style="width: 100%; justify-content: center; margin-top: 10px;">Update Password</button>
                         </form>
                     </div>
 
                     <div class="settings-card">
-                        <h3><i class="fa-solid fa-sliders" style="color: var(--secondary);"></i> Workspace Preferences</h3>
+                        <h3><i class="fa-solid fa-sliders" style="color: var(--secondary);"></i> Workspace Preferences
+                        </h3>
                         <p>Configure automated defaults and rules.</p>
                         <div class="toggle-row">
                             <div class="toggle-label">
@@ -720,11 +1955,13 @@
                                 <small>Enable automated summary reports</small>
                             </div>
                             <label class="switch">
-                                <input type="checkbox" id="pref-email-digest" checked onchange="saveDigestPreference(this)">
+                                <input type="checkbox" id="pref-email-digest" checked
+                                    onchange="saveDigestPreference(this)">
                                 <span class="slider"></span>
                             </label>
                         </div>
-                        <button type="button" class="btn-action primary" onclick="sendDailyEmailDigest()" style="width: 100%; justify-content: center; margin-top: 20px;">
+                        <button type="button" class="btn-action primary" onclick="sendDailyEmailDigest()"
+                            style="width: 100%; justify-content: center; margin-top: 20px;">
                             <i class="fa-solid fa-paper-plane"></i> Send Daily Digest Email Now
                         </button>
                     </div>
@@ -733,7 +1970,8 @@
                         <h3><i class="fa-solid fa-database" style="color: var(--absent);"></i> Data & Storage</h3>
                         <p>Backup or archive your system records securely.</p>
                         <div style="display: flex; flex-direction: column; gap: 15px; margin-top: 20px;">
-                            <button type="button" class="btn-action" onclick="downloadJSONBackup()" style="width: 100%; justify-content: center;">
+                            <button type="button" class="btn-action" onclick="downloadJSONBackup()"
+                                style="width: 100%; justify-content: center;">
                                 <i class="fa-solid fa-download"></i> Download Full System Backup
                             </button>
                         </div>
@@ -745,19 +1983,31 @@
             <div class="dashboard-body fade-in hidden" id="view-admin-overview">
                 <div class="stats-grid">
                     <div class="stat-card">
-                        <div class="stat-icon" style="background: var(--primary-subtle); color: var(--primary);"><i class="fa-solid fa-layer-group"></i></div>
-                        <div class="stat-info"><h3 id="admin-stat-groups">0</h3><p>Total Workspace Groups</p></div>
+                        <div class="stat-icon" style="background: var(--primary-subtle); color: var(--primary);"><i
+                                class="fa-solid fa-layer-group"></i></div>
+                        <div class="stat-info">
+                            <h3 id="admin-stat-groups">0</h3>
+                            <p>Total Workspace Groups</p>
+                        </div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-icon" style="background: var(--present-bg); color: var(--present);"><i class="fa-solid fa-shield-halved"></i></div>
-                        <div class="stat-info"><h3 id="admin-stat-status">Secure</h3><p>Environment Status</p></div>
+                        <div class="stat-icon" style="background: var(--present-bg); color: var(--present);"><i
+                                class="fa-solid fa-shield-halved"></i></div>
+                        <div class="stat-info">
+                            <h3 id="admin-stat-status">Secure</h3>
+                            <p>Environment Status</p>
+                        </div>
                     </div>
                 </div>
 
                 <div class="table-container" style="padding: 25px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                        <h3 style="font-size: 18px; font-weight: 800; color: var(--text-main);">Registered Groups in <span id="admin-workspace-name" style="color: var(--primary);">School</span></h3>
-                        <span style="font-size: 13px; color: var(--text-muted); font-weight: 600;">Managed via Master Admin Authority</span>
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h3 style="font-size: 18px; font-weight: 800; color: var(--text-main);">Registered Groups in
+                            <span id="admin-workspace-name" style="color: var(--primary);">School</span>
+                        </h3>
+                        <span style="font-size: 13px; color: var(--text-muted); font-weight: 600;">Managed via Master
+                            Admin Authority</span>
                     </div>
                     <table>
                         <thead>
@@ -770,7 +2020,10 @@
                             </tr>
                         </thead>
                         <tbody id="admin-groups-table-body">
-                            <tr><td colspan="5" style="text-align: center; padding: 40px; color: var(--text-muted);">Loading workspace records...</td></tr>
+                            <tr>
+                                <td colspan="5" style="text-align: center; padding: 40px; color: var(--text-muted);">
+                                    Loading workspace records...</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -780,25 +2033,31 @@
             <div class="dashboard-body fade-in hidden" id="view-admin-settings">
                 <div class="settings-grid">
                     <div class="settings-card">
-                        <h3><i class="fa-solid fa-shield-halved" style="color: var(--primary);"></i> Master Security & Key</h3>
+                        <h3><i class="fa-solid fa-shield-halved" style="color: var(--primary);"></i> Master Security &
+                            Key</h3>
                         <p>Update your master administrator credentials.</p>
                         <form onsubmit="handleMasterPasswordChange(event)" id="admin-pass-form">
                             <div class="input-group">
                                 <label>Current Master Password</label>
                                 <i class="fa-solid fa-lock-open"></i>
-                                <input type="password" id="admin-current-pass" required placeholder="Enter master key" autocomplete="current-password">
+                                <input type="password" id="admin-current-pass" required placeholder="Enter master key"
+                                    autocomplete="current-password">
                             </div>
                             <div class="input-group">
                                 <label>New Master Password</label>
                                 <i class="fa-solid fa-lock"></i>
-                                <input type="password" id="admin-new-pass" required placeholder="Enter new master key" autocomplete="new-password">
+                                <input type="password" id="admin-new-pass" required placeholder="Enter new master key"
+                                    autocomplete="new-password">
                             </div>
                             <div class="input-group">
                                 <label>Confirm New Master Password</label>
                                 <i class="fa-solid fa-check-double"></i>
-                                <input type="password" id="admin-confirm-pass" required placeholder="Confirm new master key" autocomplete="new-password">
+                                <input type="password" id="admin-confirm-pass" required
+                                    placeholder="Confirm new master key" autocomplete="new-password">
                             </div>
-                            <button type="submit" class="btn-action primary" style="width: 100%; justify-content: center; margin-top: 10px;">Update Master Key</button>
+                            <button type="submit" class="btn-action primary"
+                                style="width: 100%; justify-content: center; margin-top: 10px;">Update Master
+                                Key</button>
                         </form>
                     </div>
 
@@ -811,7 +2070,8 @@
                                 <small>Temporarily lock user logins for updates</small>
                             </div>
                             <label class="switch">
-                                <input type="checkbox" id="admin-pref-maintenance" onchange="toggleMaintenanceMode(this)">
+                                <input type="checkbox" id="admin-pref-maintenance"
+                                    onchange="toggleMaintenanceMode(this)">
                                 <span class="slider"></span>
                             </label>
                         </div>
@@ -828,10 +2088,12 @@
                     </div>
 
                     <div class="settings-card">
-                        <h3><i class="fa-solid fa-database" style="color: var(--absent);"></i> Platform Data & Backup</h3>
+                        <h3><i class="fa-solid fa-database" style="color: var(--absent);"></i> Platform Data & Backup
+                        </h3>
                         <p>Manage global database archives and maintenance.</p>
                         <div style="display: flex; flex-direction: column; gap: 15px; margin-top: 20px;">
-                            <button type="button" class="btn-action" onclick="downloadJSONBackup()" style="width: 100%; justify-content: center;">
+                            <button type="button" class="btn-action" onclick="downloadJSONBackup()"
+                                style="width: 100%; justify-content: center;">
                                 <i class="fa-solid fa-download"></i> Download Full System Backup
                             </button>
                         </div>
@@ -846,19 +2108,21 @@
     <div class="modal-overlay" id="signup-auth-modal">
         <div class="modal-card">
             <h3>Admin Authorization</h3>
-            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px; font-weight: 500;">Please enter the secure authorization password known only to the admin to register a new group.</p>
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px; font-weight: 500;">Please enter
+                the secure authorization password known only to the admin to register a new group.</p>
             <div class="input-group">
                 <label>Authorization Password</label>
                 <i class="fa-solid fa-shield-halved"></i>
                 <input type="password" id="auth-code-input" placeholder="••••••••" autocomplete="current-password">
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn-action" onclick="closeModal('signup-auth-modal')" style="background: var(--bg-main);">Cancel</button>
+                <button type="button" class="btn-action" onclick="closeModal('signup-auth-modal')"
+                    style="background: var(--bg-main);">Cancel</button>
                 <button type="button" class="btn-action primary" onclick="verifySignupAuth()">Verify & Proceed</button>
             </div>
         </div>
     </div>
-    
+
     <div class="modal-overlay" id="crud-modal">
         <div class="modal-card">
             <h3 id="modal-title">Add New Member</h3>
@@ -876,7 +2140,8 @@
                 <input type="text" id="mod-phone" placeholder="e.g. +91 9876543210" autocomplete="tel">
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn-action" onclick="closeModal('crud-modal')" style="background: var(--bg-main);">Cancel</button>
+                <button type="button" class="btn-action" onclick="closeModal('crud-modal')"
+                    style="background: var(--bg-main);">Cancel</button>
                 <button type="button" class="btn-action primary" onclick="saveStudent()">Save Details</button>
             </div>
         </div>
@@ -887,14 +2152,19 @@
         <div class="modal-card" style="max-width: 550px;">
             <h3>Batch Import Roster</h3>
             <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px; font-weight: 500;">
-                Paste multiple records below. Format each line as: <br><code>ID, Full Name, Phone</code> (Phone is optional).
+                Paste multiple records below. Format each line as: <br><code>ID, Full Name, Phone</code> (Phone is
+                optional).
             </p>
             <div class="input-group">
-                <textarea id="bulk-data-input" rows="7" placeholder="EMP-101, Rahul Sharma, +919876543210&#10;EMP-102, Priya Singh, +919123456789&#10;EMP-103, Amit Kumar" style="width: 100%; padding: 15px; border: 2px solid var(--border); border-radius: var(--radius-md); font-size: 13px; font-weight: 600; background: var(--bg-main); color: var(--text-main); resize: vertical;"></textarea>
+                <textarea id="bulk-data-input" rows="7"
+                    placeholder="EMP-101, Rahul Sharma, +919876543210&#10;EMP-102, Priya Singh, +919123456789&#10;EMP-103, Amit Kumar"
+                    style="width: 100%; padding: 15px; border: 2px solid var(--border); border-radius: var(--radius-md); font-size: 13px; font-weight: 600; background: var(--bg-main); color: var(--text-main); resize: vertical;"></textarea>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn-action" onclick="closeModal('bulk-modal')" style="background: var(--bg-main);">Cancel</button>
-                <button type="button" class="btn-action primary" onclick="processBulkImport()">Import All Members</button>
+                <button type="button" class="btn-action" onclick="closeModal('bulk-modal')"
+                    style="background: var(--bg-main);">Cancel</button>
+                <button type="button" class="btn-action primary" onclick="processBulkImport()">Import All
+                    Members</button>
             </div>
         </div>
     </div>
@@ -902,26 +2172,31 @@
     <!-- ================= DELETE AUTHORIZATION ANIMATED MODAL ================= -->
     <div class="modal-overlay" id="delete-auth-modal">
         <div class="modal-card" style="border: 2px solid rgba(239, 68, 68, 0.4);">
-            <h3 style="color: var(--absent);"><i class="fa-solid fa-triangle-exclamation"></i> Security Authorization</h3>
-            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px; font-weight: 500;">Warning: You are about to permanently delete this group. Please enter your Master Admin Key twice to confirm.</p>
-            
+            <h3 style="color: var(--absent);"><i class="fa-solid fa-triangle-exclamation"></i> Security Authorization
+            </h3>
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px; font-weight: 500;">Warning: You
+                are about to permanently delete this group. Please enter your Master Admin Key twice to confirm.</p>
+
             <input type="hidden" id="delete-class-id">
-            
+
             <div class="input-group">
                 <label style="color: var(--absent);">Master Password</label>
                 <i class="fa-solid fa-lock" style="color: var(--absent);"></i>
                 <input type="password" id="del-pass-1" placeholder="Enter Admin Password">
             </div>
-            
+
             <div class="input-group">
                 <label style="color: var(--absent);">Confirm Master Password</label>
                 <i class="fa-solid fa-check-double" style="color: var(--absent);"></i>
                 <input type="password" id="del-pass-2" placeholder="Confirm Admin Password">
             </div>
-            
+
             <div class="modal-footer">
-                <button type="button" class="btn-action" onclick="closeModal('delete-auth-modal')" style="background: var(--bg-main);">Cancel</button>
-                <button type="button" class="btn-action" onclick="executeSecureDelete()" style="background: var(--absent); color: white; border: none; box-shadow: 0 8px 20px rgba(239, 68, 68, 0.35);">Verify & Delete</button>
+                <button type="button" class="btn-action" onclick="closeModal('delete-auth-modal')"
+                    style="background: var(--bg-main);">Cancel</button>
+                <button type="button" class="btn-action" onclick="executeSecureDelete()"
+                    style="background: var(--absent); color: white; border: none; box-shadow: 0 8px 20px rgba(239, 68, 68, 0.35);">Verify
+                    & Delete</button>
             </div>
         </div>
     </div>
@@ -932,10 +2207,12 @@
             <input type="hidden" id="remark-student-id">
             <div class="input-group">
                 <label>Note / Remark (e.g., Sick Leave, Informed)</label>
-                <input type="text" id="mod-remark-text" placeholder="e.g. Informed absence due to fever" autocomplete="off">
+                <input type="text" id="mod-remark-text" placeholder="e.g. Informed absence due to fever"
+                    autocomplete="off">
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn-action" onclick="closeModal('remark-modal')" style="background: var(--bg-main);">Cancel</button>
+                <button type="button" class="btn-action" onclick="closeModal('remark-modal')"
+                    style="background: var(--bg-main);">Cancel</button>
                 <button type="button" class="btn-action primary" onclick="saveRemark()">Save Note</button>
             </div>
         </div>
@@ -950,7 +2227,8 @@
                 <input type="text" id="mod-teacher-name" placeholder="e.g. Prof. Sharma" autocomplete="name">
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn-action" onclick="closeModal('profile-modal')" style="background: var(--bg-main);">Cancel</button>
+                <button type="button" class="btn-action" onclick="closeModal('profile-modal')"
+                    style="background: var(--bg-main);">Cancel</button>
                 <button type="button" class="btn-action primary" onclick="saveProfile()">Update Profile</button>
             </div>
         </div>
@@ -981,9 +2259,9 @@
         let soundEnabled = false;
         let digestEnabled = true;
 
-        let currentUserRole = null; 
+        let currentUserRole = null;
         let currentClass = null;
-        let currentView = 'register'; 
+        let currentView = 'register';
         let currentFilterStatus = 'all';
         let analyticsChart = null;
         let workspaceType = 'School';
@@ -993,16 +2271,16 @@
 
         document.addEventListener("DOMContentLoaded", () => {
             document.getElementById('attendance-date').valueAsDate = new Date();
-            
+
             document.querySelectorAll('.modal-overlay').forEach(overlay => {
-                overlay.addEventListener('click', function(e) {
+                overlay.addEventListener('click', function (e) {
                     if (e.target === this) {
                         closeModal(this.id);
                     }
                 });
             });
 
-            document.addEventListener("keydown", function(event) {
+            document.addEventListener("keydown", function (event) {
                 if (event.key === "Enter") {
                     const crudModal = document.getElementById('crud-modal');
                     if (crudModal.classList.contains('active')) {
@@ -1044,15 +2322,15 @@
                 let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 let oscillator = audioCtx.createOscillator();
                 let gainNode = audioCtx.createGain();
-                
+
                 oscillator.type = 'sine';
-                oscillator.frequency.setValueAtTime(587.33, audioCtx.currentTime); 
+                oscillator.frequency.setValueAtTime(587.33, audioCtx.currentTime);
                 gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
                 gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.15);
-                
+
                 oscillator.connect(gainNode);
                 gainNode.connect(audioCtx.destination);
-                
+
                 oscillator.start();
                 oscillator.stop(audioCtx.currentTime + 0.15);
             } catch (e) {
@@ -1084,13 +2362,13 @@
                 const response = await fetch('/attendancesystem/forgot_password.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        email: db.classes[currentClass]?.email || 'eduprosecurity@gmail.com', 
+                    body: JSON.stringify({
+                        email: db.classes[currentClass]?.email || 'eduprosecurity@gmail.com',
                         workspace: workspaceType,
-                        custom_message: reportSummary 
+                        custom_message: reportSummary
                     })
                 });
-                
+
                 showToast("Daily summary report generated and dispatched!");
             } catch (err) {
                 showToast("Email digest summary compiled successfully!");
@@ -1132,10 +2410,10 @@
             let increment = end > start ? 1 : -1;
             let stepTime = Math.abs(Math.floor(duration / range));
             let obj = document.getElementById(id);
-            let timer = setInterval(function() {
+            let timer = setInterval(function () {
                 current += increment;
                 obj.innerHTML = current;
-                if (current == end) clearInterval(timer); 
+                if (current == end) clearInterval(timer);
             }, stepTime);
         }
 
@@ -1154,7 +2432,7 @@
             const grpLblLog = document.getElementById('lbl-group-name');
             const sbIcon = document.getElementById('sidebar-brand-icon');
 
-            if(type === 'School') {
+            if (type === 'School') {
                 subtitle.innerText = "Smart School Attendance";
                 tab1.innerText = "Class Teacher"; tab2.innerText = "Principal / Admin";
                 grpLblLog.innerText = "Class Name";
@@ -1198,7 +2476,7 @@
         function switchMainTab(role) {
             document.querySelectorAll('.login-tab').forEach(t => t.classList.remove('active'));
             event.target.classList.add('active');
-            if(role === 'teacher') {
+            if (role === 'teacher') {
                 document.getElementById('teacher-section').classList.remove('hidden');
                 document.getElementById('principal-form').classList.add('hidden');
                 switchTeacherView('login');
@@ -1210,9 +2488,9 @@
 
         function switchTeacherView(view) {
             ['t-login-form', 't-signup-form', 't-forgot-form'].forEach(id => document.getElementById(id).classList.add('hidden'));
-            if(view === 'login') document.getElementById('t-login-form').classList.remove('hidden');
-            else if(view === 'signup') document.getElementById('t-signup-form').classList.remove('hidden');
-            else if(view === 'forgot') document.getElementById('t-forgot-form').classList.remove('hidden');
+            if (view === 'login') document.getElementById('t-login-form').classList.remove('hidden');
+            else if (view === 'signup') document.getElementById('t-signup-form').classList.remove('hidden');
+            else if (view === 'forgot') document.getElementById('t-forgot-form').classList.remove('hidden');
         }
 
         function promptSignupAuth() {
@@ -1240,11 +2518,11 @@
                     alert("System is currently under Maintenance Mode. Logins are temporarily locked.");
                     return;
                 }
-            } catch(err) { }
+            } catch (err) { }
 
             const className = document.getElementById('t-class-login').value.trim();
             const password = document.getElementById('t-pass-login').value;
-            
+
             try {
                 const response = await fetch(`${API_BASE}/login.php`, {
                     method: 'POST',
@@ -1252,10 +2530,10 @@
                     body: JSON.stringify({ workspace: workspaceType, username: className, password: password })
                 });
                 const result = await response.json();
-                
+
                 if (result.success) {
-                    currentUserRole = result.role; 
-                    currentClass = result.className || className; 
+                    currentUserRole = result.role;
+                    currentClass = result.className || className;
                     if (!db.classes[currentClass]) {
                         db.classes[currentClass] = { teacherName: result.teacherName || "Teacher", students: [], history: {} };
                     }
@@ -1300,7 +2578,7 @@
         async function handleTeacherForgot(e) {
             e.preventDefault();
             const email = document.getElementById('t-email-forgot').value.trim();
-            
+
             const submitBtn = e.target.querySelector('button[type="submit"]');
             const originalText = submitBtn.innerHTML;
             submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending Email...';
@@ -1311,7 +2589,7 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email: email, workspace: workspaceType })
                 });
-                
+
                 const result = await response.json();
 
                 if (result.success) {
@@ -1333,9 +2611,9 @@
             e.preventDefault();
             const id = document.getElementById('p-id').value;
             const password = document.getElementById('p-pass').value;
-            
+
             if (id === db.principalAuth.id && password === db.principalAuth.pass) {
-                currentUserRole = 'principal'; 
+                currentUserRole = 'principal';
                 initDashboard();
                 showToast(`Master Admin Mode: ${workspaceType} Command Center`);
             } else alert("Invalid ID/Password.\nHint: Use 'admin' & 'admin123'");
@@ -1348,7 +2626,7 @@
                 if (result.success) {
                     if (!db.classes[currentClass]) db.classes[currentClass] = { students: [], history: {} };
                     db.classes[currentClass].students = result.students;
-                    
+
                     const dateStr = document.getElementById('attendance-date').value || new Date().toISOString().split('T')[0];
                     db.classes[currentClass].history[dateStr] = JSON.parse(JSON.stringify(result.students));
 
@@ -1375,7 +2653,7 @@
             document.getElementById('auth-container').classList.add('hidden');
             document.getElementById('app-screen').classList.remove('hidden');
 
-            if(currentUserRole === 'principal') {
+            if (currentUserRole === 'principal') {
                 document.getElementById('teacher-nav').classList.add('hidden');
                 document.getElementById('admin-nav').classList.remove('hidden');
                 document.getElementById('nav-avatar').innerText = 'A';
@@ -1383,7 +2661,7 @@
                 document.getElementById('nav-role').innerText = 'Master Command';
                 document.querySelector('.edit-profile-btn').classList.add('hidden');
                 document.getElementById('principal-controls').classList.add('hidden');
-                
+
                 await fetchAllGroupsForAdmin();
                 switchDashboardView('admin-overview');
             } else {
@@ -1393,7 +2671,7 @@
                 document.getElementById('nav-role').innerText = `${workspaceType} : ${currentClass}`;
                 document.querySelector('.edit-profile-btn').classList.remove('hidden');
                 document.getElementById('principal-controls').classList.add('hidden');
-                if(workspaceType !== 'School') document.getElementById('lbl-total').innerText = "Total Members";
+                if (workspaceType !== 'School') document.getElementById('lbl-total').innerText = "Total Members";
                 switchDashboardView('register');
                 fetchStudentsForClass();
             }
@@ -1403,7 +2681,7 @@
             try {
                 const response = await fetch(`${API_BASE}/admin_data.php?action=get_all_groups&workspace=${encodeURIComponent(workspaceType)}`);
                 const result = await response.json();
-                
+
                 document.getElementById('admin-workspace-name').innerText = workspaceType;
                 const tbody = document.getElementById('admin-groups-table-body');
                 tbody.innerHTML = '';
@@ -1458,19 +2736,19 @@
             currentView = view;
             ['register', 'calendar', 'directory', 'analytics', 'settings', 'admin-overview', 'admin-settings'].forEach(v => {
                 const el = document.getElementById(`nav-${v}`);
-                if(el) el.classList.remove('active');
+                if (el) el.classList.remove('active');
                 const viewEl = document.getElementById(`view-${v}`);
-                if(viewEl) viewEl.classList.add('hidden');
+                if (viewEl) viewEl.classList.add('hidden');
             });
-            
+
             const activeNav = document.getElementById(`nav-${view}`);
-            if(activeNav) activeNav.classList.add('active');
-            
+            if (activeNav) activeNav.classList.add('active');
+
             const activeView = document.getElementById(`view-${view}`);
-            if(activeView) activeView.classList.remove('hidden');
+            if (activeView) activeView.classList.remove('hidden');
 
             renderCurrentView();
-            if(window.innerWidth <= 900) toggleSidebar();
+            if (window.innerWidth <= 900) toggleSidebar();
         }
 
         function renderCurrentView() {
@@ -1506,7 +2784,7 @@
         function renderMonthlyCalendar() {
             const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
             document.getElementById('cal-month-title').innerText = `${monthNames[calendarMonth]} ${calendarYear}`;
-            
+
             const grid = document.getElementById('cal-grid');
             grid.innerHTML = '';
 
@@ -1529,7 +2807,7 @@
                 const formattedMonth = String(calendarMonth + 1).padStart(2, '0');
                 const formattedDay = String(day).padStart(2, '0');
                 const dateStr = `${calendarYear}-${formattedMonth}-${formattedDay}`;
-                
+
                 const isSelected = (dateStr === currentDateStr);
                 const isToday = (dateStr === new Date().toISOString().split('T')[0]);
 
@@ -1599,8 +2877,8 @@
                 let delayIndex = 0;
                 students.forEach(student => {
                     stats.total++;
-                    if(student.status === 'present') stats.present++;
-                    else if(student.status === 'absent') stats.absent++;
+                    if (student.status === 'present') stats.present++;
+                    else if (student.status === 'absent') stats.absent++;
                     else stats.late++;
 
                     const matchesSearch = student.name.toLowerCase().includes(query) || student.id.toLowerCase().includes(query);
@@ -1611,7 +2889,7 @@
                         tr.className = 'stagger-row';
                         tr.style.animationDelay = `${delayIndex * 0.04}s`;
                         delayIndex++;
-                        
+
                         tr.innerHTML = `
                             <td style="font-weight: 800; color: var(--text-muted);">${student.id}</td>
                             <td>
@@ -1654,16 +2932,16 @@
         function setStatus(id, newStatus) {
             const students = getActiveStudentsList();
             const student = students.find(s => s.id === id);
-            if (student) { 
-                student.status = newStatus; 
+            if (student) {
+                student.status = newStatus;
                 playClickSound();
-                renderRegisterTable(); 
+                renderRegisterTable();
             }
         }
 
         function markAll(status) {
             const students = getActiveStudentsList();
-            if(!students.length) return;
+            if (!students.length) return;
             students.forEach(s => {
                 s.status = status;
             });
@@ -1678,19 +2956,19 @@
             const tbody = document.getElementById('table-body-directory');
             tbody.innerHTML = '';
 
-            if(!students.length) {
+            if (!students.length) {
                 tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:50px; color:var(--text-muted);">No records available.</td></tr>`;
                 return;
             }
 
             let delayIndex = 0;
             students.forEach(student => {
-                if(student.name.toLowerCase().includes(query) || student.id.toLowerCase().includes(query)) {
+                if (student.name.toLowerCase().includes(query) || student.id.toLowerCase().includes(query)) {
                     let healthColor = 'var(--present)';
                     let healthText = 'Good';
                     let pulseClass = '';
-                    if(student.attendanceRate < 75) { healthColor = 'var(--absent)'; healthText = 'At Risk (<75%)'; pulseClass = 'at-risk'; }
-                    else if(student.attendanceRate < 85) { healthColor = 'var(--late)'; healthText = 'Warning'; }
+                    if (student.attendanceRate < 75) { healthColor = 'var(--absent)'; healthText = 'At Risk (<75%)'; pulseClass = 'at-risk'; }
+                    else if (student.attendanceRate < 85) { healthColor = 'var(--late)'; healthText = 'Warning'; }
 
                     const tr = document.createElement('tr');
                     tr.className = 'stagger-row';
@@ -1720,7 +2998,7 @@
 
         function renderAnalytics() {
             const students = db.classes[currentClass]?.students || [];
-            if(!students.length) return;
+            if (!students.length) return;
 
             let totalRate = 0;
             let bestStudent = students[0];
@@ -1728,8 +3006,8 @@
 
             students.forEach(s => {
                 totalRate += s.attendanceRate;
-                if(s.attendanceRate > bestStudent.attendanceRate) bestStudent = s;
-                if(s.attendanceRate < worstStudent.attendanceRate) worstStudent = s;
+                if (s.attendanceRate > bestStudent.attendanceRate) bestStudent = s;
+                if (s.attendanceRate < worstStudent.attendanceRate) worstStudent = s;
             });
 
             const avgRate = Math.round(totalRate / students.length);
@@ -1738,7 +3016,7 @@
             document.getElementById('analytics-worst').innerText = worstStudent.name;
 
             const ctx = document.getElementById('attendanceChart').getContext('2d');
-            if(analyticsChart) analyticsChart.destroy();
+            if (analyticsChart) analyticsChart.destroy();
 
             analyticsChart = new Chart(ctx, {
                 type: 'bar',
@@ -1793,15 +3071,15 @@
                 const response = await fetch(`${API_BASE}/update_password.php`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        className: activeGroup, 
-                        currentPassword: currentPass, 
-                        newPassword: newPass 
+                    body: JSON.stringify({
+                        className: activeGroup,
+                        currentPassword: currentPass,
+                        newPassword: newPass
                     })
                 });
-                
+
                 const result = await response.json();
-                
+
                 if (result.success) {
                     showToast(result.message);
                     document.getElementById('password-change-form').reset();
@@ -1848,7 +3126,7 @@
         }
 
         function triggerDataReset() {
-            if(confirm("Are you sure you want to clear session logs?")) {
+            if (confirm("Are you sure you want to clear session logs?")) {
                 showToast("Session logs cleared successfully.");
             }
         }
@@ -1864,7 +3142,7 @@
             } else if (mode === 'edit') {
                 document.getElementById('modal-title').innerText = "Edit Details";
                 const student = db.classes[currentClass].students.find(s => s.id === id);
-                document.getElementById('edit-id').value = student.id; 
+                document.getElementById('edit-id').value = student.id;
                 document.getElementById('mod-id').value = student.id;
                 document.getElementById('mod-name').value = student.name;
                 document.getElementById('mod-phone').value = student.phone || "";
@@ -1884,14 +3162,14 @@
             let successCount = 0;
 
             showToast("Importing members in bulk...");
-            
+
             for (let line of lines) {
                 line = line.trim();
                 if (!line) continue;
 
                 // FIX: Only split by comma, NOT spaces or tabs!
                 const parts = line.split(',').map(p => p.trim());
-                
+
                 if (parts.length >= 2) {
                     const studentId = parts[0];
                     const name = parts[1];
@@ -1923,7 +3201,7 @@
             const newName = document.getElementById('mod-name').value.trim();
             const newPhone = document.getElementById('mod-phone').value.trim() || "+91 0000000000";
 
-            if(!newId || !newName) return alert("Please fill both ID and Name fields.");
+            if (!newId || !newName) return alert("Please fill both ID and Name fields.");
 
             try {
                 const response = await fetch(`${API_BASE}/students.php`, {
@@ -1978,22 +3256,22 @@
             const noteText = document.getElementById('mod-remark-text').value.trim();
             const students = getActiveStudentsList();
             const student = students.find(s => s.id === id);
-            
-            if(student) {
+
+            if (student) {
                 // 1. Update the display instantly
                 student.remark = noteText;
                 renderRegisterTable();
-                
+
                 // 2. Send the data to the database permanently
                 try {
                     await fetch(`${API_BASE}/students.php`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ 
-                            action: 'update_remark', 
-                            className: currentClass, 
-                            studentId: id, 
-                            remark: noteText 
+                        body: JSON.stringify({
+                            action: 'update_remark',
+                            className: currentClass,
+                            studentId: id,
+                            remark: noteText
                         })
                     });
                     showToast("Note saved permanently!");
@@ -2018,14 +3296,14 @@
 
         function saveProfile() {
             const newName = document.getElementById('mod-teacher-name').value.trim();
-            if(!newName) return alert("Name cannot be empty.");
+            if (!newName) return alert("Name cannot be empty.");
             db.classes[currentClass].teacherName = newName;
             updateProfileUI();
             closeModal('profile-modal');
             showToast("Profile updated!");
         }
 
-        function closeModal(modalId) { 
+        function closeModal(modalId) {
             const modal = document.getElementById(modalId);
             if (modal) {
                 modal.classList.remove('active');
@@ -2038,11 +3316,11 @@
 
             const sessionVal = document.getElementById('session-selector').value;
             const dateStr = document.getElementById('attendance-date').value || new Date().toISOString().split('T')[0];
-            
+
             let csvContent = "data:text/csv;charset=utf-8,";
             csvContent += `Workspace:,${workspaceType},Group:,${currentClass},Session:,${sessionVal},Date:,${dateStr}\n\n`;
             csvContent += "ID,Full Name,Contact Info,Status,Note/Remark\n";
-            
+
             students.forEach(student => {
                 csvContent += `"${student.id}","${student.name}","${student.phone}","${student.status.toUpperCase()}","${student.remark || ''}"\n`;
             });
@@ -2052,7 +3330,7 @@
             link.setAttribute("download", `${workspaceType}_${currentClass.replace(/\s+/g, '_')}_${sessionVal}_${dateStr}.csv`);
             document.body.appendChild(link);
             link.click();
-            document.body.removeChild(link); 
+            document.body.removeChild(link);
             showToast("CSV file downloaded successfully!");
         }
 
@@ -2094,7 +3372,7 @@
             const sessionVal = document.getElementById('session-selector').value;
             const dateStr = document.getElementById('attendance-date').value || new Date().toISOString().split('T')[0];
 
-            doc.setFillColor(67, 56, 202); 
+            doc.setFillColor(67, 56, 202);
             doc.rect(0, 0, 210, 25, "F");
             doc.setTextColor(255, 255, 255);
             doc.setFont("helvetica", "bold");
@@ -2148,8 +3426,8 @@
             showToast("PDF report downloaded successfully!");
         }
 
-        function toggleSidebar() { 
-            document.getElementById('sidebar').classList.toggle('open'); 
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
         }
 
         // ====== ANIMATED MODAL SECURE DELETE ======
@@ -2191,21 +3469,22 @@
                     admin_password: pass1
                 })
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    showToast(data.message);
-                    closeModal('delete-auth-modal'); 
-                    fetchAllGroupsForAdmin(); 
-                } else {
-                    alert("Error: " + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert("An error occurred while deleting.");
-            });
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast(data.message);
+                        closeModal('delete-auth-modal');
+                        fetchAllGroupsForAdmin();
+                    } else {
+                        alert("Error: " + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert("An error occurred while deleting.");
+                });
         }
     </script>
 </body>
+
 </html>
