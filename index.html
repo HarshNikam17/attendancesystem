@@ -965,6 +965,13 @@
 
     <!-- ================= APPLICATION JAVASCRIPT ================= -->
     <script>
+        // BACKEND API BASE CONFIGURATION:
+        // Set this to your deployed PHP backend URL (e.g. 'https://your-backend.onrender.com' or 'https://yourdomain.com')
+        // Or keep '/attendancesystem' if using Netlify Proxy (_redirects).
+        const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+            ? '/attendancesystem'
+            : '/attendancesystem';
+
         const db = {
             principalAuth: { id: 'admin', pass: 'admin123' },
             registrationCode: "create123",
@@ -1103,7 +1110,7 @@
         async function toggleMaintenanceMode(checkbox) {
             const isEnabled = checkbox.checked;
             try {
-                const response = await fetch('/attendancesystem/maintenance.php', {
+                const response = await fetch(`${API_BASE}/maintenance.php`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ maintenance: isEnabled })
@@ -1227,7 +1234,7 @@
             e.preventDefault();
 
             try {
-                const mCheck = await fetch('/attendancesystem/maintenance.php');
+                const mCheck = await fetch(`${API_BASE}/maintenance.php`);
                 const mRes = await mCheck.json();
                 if (mRes.maintenance) {
                     alert("System is currently under Maintenance Mode. Logins are temporarily locked.");
@@ -1239,7 +1246,7 @@
             const password = document.getElementById('t-pass-login').value;
             
             try {
-                const response = await fetch('/attendancesystem/login.php', {
+                const response = await fetch(`${API_BASE}/login.php`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ workspace: workspaceType, username: className, password: password })
@@ -1270,7 +1277,7 @@
             const password = document.getElementById('t-pass-reg').value;
 
             try {
-                const response = await fetch('/attendancesystem/signup.php', {
+                const response = await fetch(`${API_BASE}/signup.php`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ workspace: workspaceType, className, teacherName, email, password })
@@ -1299,7 +1306,7 @@
             submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending Email...';
 
             try {
-                const response = await fetch('/attendancesystem/forgot_password.php', {
+                const response = await fetch(`${API_BASE}/forgot_password.php`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email: email, workspace: workspaceType })
@@ -1336,7 +1343,7 @@
 
         async function fetchStudentsForClass() {
             try {
-                const response = await fetch(`/attendancesystem/students.php?action=get&className=${encodeURIComponent(currentClass)}`);
+                const response = await fetch(`${API_BASE}/students.php?action=get&className=${encodeURIComponent(currentClass)}`);
                 const result = await response.json();
                 if (result.success) {
                     if (!db.classes[currentClass]) db.classes[currentClass] = { students: [], history: {} };
@@ -1394,7 +1401,7 @@
 
         async function fetchAllGroupsForAdmin() {
             try {
-                const response = await fetch(`/attendancesystem/admin_data.php?action=get_all_groups&workspace=${encodeURIComponent(workspaceType)}`);
+                const response = await fetch(`${API_BASE}/admin_data.php?action=get_all_groups&workspace=${encodeURIComponent(workspaceType)}`);
                 const result = await response.json();
                 
                 document.getElementById('admin-workspace-name').innerText = workspaceType;
@@ -1783,7 +1790,7 @@
             }
 
             try {
-                const response = await fetch('/attendancesystem/update_password.php', {
+                const response = await fetch(`${API_BASE}/update_password.php`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
@@ -1836,7 +1843,7 @@
         function savePreferences() { showToast("Preferences updated successfully!"); }
 
         function downloadJSONBackup() {
-            window.location.href = '/attendancesystem/backup.php';
+            window.location.href = `${API_BASE}/backup.php`;
             showToast("Database SQL backup downloaded successfully!");
         }
 
@@ -1891,7 +1898,7 @@
                     const phone = parts[2] || "+91 0000000000";
 
                     try {
-                        const response = await fetch('/attendancesystem/students.php', {
+                        const response = await fetch(`${API_BASE}/students.php`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ action: 'save', className: currentClass, studentId, name, phone })
@@ -1919,7 +1926,7 @@
             if(!newId || !newName) return alert("Please fill both ID and Name fields.");
 
             try {
-                const response = await fetch('/attendancesystem/students.php', {
+                const response = await fetch(`${API_BASE}/students.php`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: 'save', className: currentClass, studentId: newId, name: newName, phone: newPhone })
@@ -1940,7 +1947,7 @@
         async function deleteStudent(id) {
             if (confirm("Are you sure you want to delete this record forever?")) {
                 try {
-                    const response = await fetch('/attendancesystem/students.php', {
+                    const response = await fetch(`${API_BASE}/students.php`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ action: 'delete', className: currentClass, studentId: id })
@@ -1979,7 +1986,7 @@
                 
                 // 2. Send the data to the database permanently
                 try {
-                    await fetch('/attendancesystem/students.php', {
+                    await fetch(`${API_BASE}/students.php`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ 
@@ -2173,7 +2180,7 @@
                 return;
             }
 
-            fetch('/attendancesystem/admin_data.php', {
+            fetch(`${API_BASE}/admin_data.php`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

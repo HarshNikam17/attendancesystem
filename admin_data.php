@@ -1,6 +1,9 @@
 <?php
+// admin_data.php
 error_reporting(0);
 ini_set('display_errors', 0);
+
+require_once __DIR__ . '/db.php';
 header('Content-Type: application/json');
 
 $action = $_GET['action'] ?? '';
@@ -9,14 +12,7 @@ if (isset($data['action'])) {
     $action = $data['action'];
 }
 
-$host = "localhost";
-$user = "root";
-$pass = "";
-$dbname = "eduprom_db";
-
-$conn = @new mysqli($host, $user, $pass, $dbname);
-
-if ($conn->connect_error) {
+if (!$conn || $conn->connect_error) {
     echo json_encode(["success" => false, "message" => "Database connection failed"]);
     exit;
 }
@@ -51,13 +47,21 @@ else if ($action === 'delete_group') {
     }
 
     // --- SECURITY CHECK: VERIFY MASTER PASSWORD ---
-    if ($adminPassword !== 'admin123') { 
+    $masterPass = getenv('ADMIN_MASTER_PASSWORD') ?: 'admin123';
+    if ($adminPassword !== $masterPass) { 
         echo json_encode(["success" => false, "message" => "Incorrect Admin Password! Deletion cancelled."]);
         exit;
     }
     // ----------------------------------------------
 
-    // Password matches! Proceed with deletion.
+    // Delete associated students first, then the class
+    $stmtDelStudents = $conn->prepare("DELETE FROM students WHERE class_id = ?");
+    if ($stmtDelStudents) {
+        $stmtDelStudents->bind_param("i", $classId);
+        $stmtDelStudents->execute();
+        $stmtDelStudents->close();
+    }
+
     $stmt = $conn->prepare("DELETE FROM classes WHERE class_id = ?");
     $stmt->bind_param("i", $classId);
     if ($stmt->execute()) {
@@ -67,6 +71,4 @@ else if ($action === 'delete_group') {
     }
     $stmt->close();
 }
-
-$conn->close();
 ?>

@@ -1,0 +1,5 @@
+# ====================================================================
+# Netlify Redirects & API Proxy Configuration
+# ====================================================================
+/attendancesystem/*  https://harxattend.alwaysdata.net/:splat  200!
+/*  /index.html  200

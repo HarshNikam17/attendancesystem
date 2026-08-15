@@ -1,50 +1,54 @@
 <?php
+// backup.php
 error_reporting(0);
-$host = "localhost";
-$user = "root";
-$pass = "";
-$dbname = "eduprom_db"; // Make sure this matches your exact database name
+ini_set('display_errors', 0);
 
-$conn = new mysqli($host, $user, $pass, $dbname);
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+require_once __DIR__ . '/db.php';
+
+if (!$conn || $conn->connect_error) {
+    die("Database connection failed");
 }
 
 $tables = array();
 $result = $conn->query("SHOW TABLES");
-while ($row = $result->fetch_row()) {
-    $tables[] = $row[0];
+if ($result) {
+    while ($row = $result->fetch_row()) {
+        $tables[] = $row[0];
+    }
 }
 
-$return = "";
+$return = "-- EduPro Database SQL Backup\n-- Generated on " . date('Y-m-d H:i:s') . "\n\nSET FOREIGN_KEY_CHECKS=0;\n\n";
+
 foreach ($tables as $table) {
-    $result = $conn->query("SELECT * FROM $table");
-    $numFields = $result->field_count;
+    $result = $conn->query("SELECT * FROM `$table`");
+    $numFields = $result ? $result->field_count : 0;
     
-    $return .= "DROP TABLE IF EXISTS $table;";
-    $row2 = $conn->query("SHOW CREATE TABLE $table")->fetch_row();
-    $return .= "\n\n" . $row2[1] . ";\n\n";
+    $return .= "DROP TABLE IF EXISTS `$table`;\n";
+    $createRow = $conn->query("SHOW CREATE TABLE `$table`")->fetch_row();
+    $return .= $createRow[1] . ";\n\n";
     
-    for ($i = 0; $i < $numFields; $i++) {
+    if ($result) {
         while ($row = $result->fetch_row()) {
-            $return .= "INSERT INTO $table VALUES(";
+            $return .= "INSERT INTO `$table` VALUES(";
             for ($j = 0; $j < $numFields; $j++) {
-                $row[$j] = addslashes($row[$j]);
-                $row[$j] = str_replace("\n", "\\n", $row[$j]);
                 if (isset($row[$j])) {
-                    $return .= '"' . $row[$j] . '"';
+                    $val = addslashes($row[$j]);
+                    $val = str_replace("\n", "\\n", $val);
+                    $return .= '"' . $val . '"';
                 } else {
-                    $return .= '""';
+                    $return .= 'NULL';
                 }
                 if ($j < ($numFields - 1)) {
-                    $return .= ',';
+                    $return .= ', ';
                 }
             }
             $return .= ");\n";
         }
+        $return .= "\n\n";
     }
-    $return .= "\n\n\n";
 }
+
+$return .= "SET FOREIGN_KEY_CHECKS=1;\n";
 
 $fileName = 'EduPro_Database_Backup_' . date('Y-m-d') . '.sql';
 header('Content-Type: application/octet-stream');

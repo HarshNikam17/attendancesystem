@@ -1,8 +1,9 @@
 <?php
-// Prevent PHP error warnings from breaking the JSON response
+// signup.php
 error_reporting(0);
 ini_set('display_errors', 0);
 
+require_once __DIR__ . '/db.php';
 header('Content-Type: application/json');
 
 $data = json_decode(file_get_contents("php://input"), true);
@@ -18,16 +19,7 @@ if (!$className || !$teacherName || !$email || !$password) {
     exit;
 }
 
-// Database Connection
-$host = "localhost";
-$user = "root";
-$pass = "";
-$dbname = "eduprom_db";
-
-$conn = @new mysqli($host, $user, $pass);
-
-if ($conn->connect_error) {
-    // Fallback mode if MySQL is offline
+if (!$conn || $conn->connect_error) {
     echo json_encode([
         "success" => true, 
         "message" => "Group registered successfully! (Offline Mode)"
@@ -35,13 +27,10 @@ if ($conn->connect_error) {
     exit;
 }
 
-// Auto-create database & table if missing
-@$conn->query("CREATE DATABASE IF NOT EXISTS `$dbname`");
-@$conn->select_db($dbname);
-
+// Auto-create classes table if missing
 $tableQuery = "CREATE TABLE IF NOT EXISTS classes (
     class_id INT AUTO_INCREMENT PRIMARY KEY,
-    workspace VARCHAR(50),
+    workspace VARCHAR(50) DEFAULT 'School',
     class_name VARCHAR(100),
     teacher_name VARCHAR(100),
     email VARCHAR(100),
@@ -59,7 +48,6 @@ if ($stmt) {
     if ($stmt->num_rows > 0) {
         echo json_encode(["success" => false, "message" => "This group name already exists. Please choose another."]);
         $stmt->close();
-        $conn->close();
         exit;
     }
     $stmt->close();
@@ -78,6 +66,4 @@ if ($stmt) {
 } else {
     echo json_encode(["success" => true, "message" => "Group registered successfully!"]);
 }
-
-$conn->close();
 ?>

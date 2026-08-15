@@ -1,4 +1,9 @@
 <?php
+// ai_chat.php
+error_reporting(0);
+ini_set('display_errors', 0);
+
+require_once __DIR__ . '/cors.php';
 header('Content-Type: application/json');
 
 $data = json_decode(file_get_contents("php://input"), true);
@@ -9,9 +14,7 @@ if (!$userMessage) {
     exit;
 }
 
-// Optional: If you want to connect live OpenAI API keys later, put it here.
-// Leaving it blank will automatically use our robust built-in smart assistant engine below.
-$apiKey = "YOUR_OPENAI_API_KEY"; 
+$apiKey = getenv("OPENAI_API_KEY") ?: "YOUR_OPENAI_API_KEY"; 
 
 if ($apiKey === "YOUR_OPENAI_API_KEY" || empty($apiKey)) {
     $reply = generateSmartFallbackResponse($userMessage);

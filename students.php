@@ -1,28 +1,56 @@
 <?php
+// students.php
 error_reporting(0);
 ini_set('display_errors', 0);
-require_once 'db.php';
+
+require_once __DIR__ . '/db.php';
 header('Content-Type: application/json');
 
 $data = json_decode(file_get_contents("php://input"), true);
 $action = $data['action'] ?? $_GET['action'] ?? '';
 
+if (!$pdo) {
+    echo json_encode(["success" => false, "message" => "Database connection unavailable."]);
+    exit;
+}
+
 try {
-    // Robust helper to find class ID by Name
+    // Auto-create tables if missing
+    $pdo->exec("CREATE TABLE IF NOT EXISTS classes (
+        class_id INT AUTO_INCREMENT PRIMARY KEY,
+        workspace VARCHAR(50) DEFAULT 'School',
+        class_name VARCHAR(100),
+        teacher_name VARCHAR(100),
+        email VARCHAR(100),
+        password VARCHAR(100)
+    )");
+
+    $pdo->exec("CREATE TABLE IF NOT EXISTS students (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        student_id VARCHAR(50) NOT NULL,
+        name VARCHAR(100) NOT NULL,
+        phone VARCHAR(50) DEFAULT '',
+        class_id INT NOT NULL,
+        status VARCHAR(20) DEFAULT 'present',
+        remark TEXT DEFAULT NULL,
+        attendance_rate INT DEFAULT 100
+    )");
+
+    // Helper to find class ID by Name
     function resolveClassId($pdo, $identifier) {
-        if (empty($identifier)) return null;
+        if (empty($identifier) || !$pdo) return null;
 
         // 1. Exact match by class_name
-        $stmt = $pdo->prepare("SELECT id FROM classes WHERE class_name = :identifier");
+        $stmt = $pdo->prepare("SELECT class_id FROM classes WHERE class_name = :identifier");
         $stmt->execute(['identifier' => $identifier]);
         $class = $stmt->fetch();
-        if ($class) return $class['id'];
+        if ($class) return $class['class_id'];
 
         // 2. Loose match (case-insensitive or trimmed)
-        $stmt = $pdo->prepare("SELECT id FROM classes WHERE TRIM(LOWER(class_name)) = TRIM(LOWER(:identifier))");
+        $stmt = $pdo->prepare("SELECT class_id FROM classes WHERE TRIM(LOWER(class_name)) = TRIM(LOWER(:identifier))");
         $stmt->execute(['identifier' => $identifier]);
         $class = $stmt->fetch();
-        if ($class) return $class['id'];
+        if ($class) return $class['class_id'];
 
         return null;
     }
@@ -33,8 +61,6 @@ try {
         $classId = resolveClassId($pdo, $className);
         
         if (!$classId) {
-            // Auto-create class if it doesn't exist yet to prevent blocking the user
-            // FIXED: Removed teacher_name and other missing columns
             $stmt = $pdo->prepare("INSERT INTO classes (class_name) VALUES (:cName)");
             $stmt->execute(['cName' => $className]);
             $classId = $pdo->lastInsertId();
@@ -66,7 +92,6 @@ try {
 
         $classId = resolveClassId($pdo, $className);
         if (!$classId) {
-            // FIXED: Removed teacher_name and other missing columns
             $stmt = $pdo->prepare("INSERT INTO classes (class_name) VALUES (:cName)");
             $stmt->execute(['cName' => $className]);
             $classId = $pdo->lastInsertId();
@@ -98,7 +123,6 @@ try {
         $classId = resolveClassId($pdo, $className);
 
         if ($classId) {
-            // Safe delete isolated to this class
             $stmt = $pdo->prepare("DELETE FROM students WHERE student_id = :studentId AND class_id = :classId");
             $stmt->execute(['studentId' => $studentId, 'classId' => $classId]);
             echo json_encode(["success" => true, "message" => "Record removed."]);

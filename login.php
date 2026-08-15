@@ -1,8 +1,9 @@
 <?php
-// Prevent PHP warnings from breaking JSON responses
+// login.php
 error_reporting(0);
 ini_set('display_errors', 0);
 
+require_once __DIR__ . '/db.php';
 header('Content-Type: application/json');
 
 $data = json_decode(file_get_contents("php://input"), true);
@@ -16,16 +17,8 @@ if (!$username || !$password) {
     exit;
 }
 
-// Database Connection
-$host = "localhost";
-$user = "root";
-$pass = "";
-$dbname = "eduprom_db";
-
-$conn = @new mysqli($host, $user, $pass, $dbname);
-
-if ($conn->connect_error) {
-    // Fallback mode if offline
+if (!$conn || $conn->connect_error) {
+    // Fallback mode if offline or database unreachable
     echo json_encode([
         "success" => true,
         "role" => "teacher",
@@ -63,8 +56,6 @@ if ($stmt) {
     }
     $stmt->close();
 } else {
-    echo json_encode(["success" => false, "message" => "Database query error."]);
+    echo json_encode(["success" => false, "message" => "Database query error: " . $conn->error]);
 }
-
-$conn->close();
 ?>

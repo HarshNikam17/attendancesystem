@@ -1,0 +1,15 @@
+# netlify.toml
+
+[build]
+  publish = "."
+
+[[redirects]]
+  from = "/attendancesystem/*"
+  to = "https://harxattend.alwaysdata.net/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

@@ -1,6 +1,9 @@
 <?php
-error_reporting(E_ALL);
+// update_password.php
+error_reporting(0);
 ini_set('display_errors', 0);
+
+require_once __DIR__ . '/db.php';
 header('Content-Type: application/json');
 
 try {
@@ -16,21 +19,15 @@ try {
         exit;
     }
 
-    $host = "localhost";
-    $user = "root";
-    $pass = "";
-    $dbname = "eduprom_db";
-
-    $conn = new mysqli($host, $user, $pass, $dbname);
-
-    if ($conn->connect_error) {
-        echo json_encode(["success" => false, "message" => "Database connection failed: " . $conn->connect_error]);
+    if (!$conn || $conn->connect_error) {
+        echo json_encode(["success" => false, "message" => "Database connection failed"]);
         exit;
     }
 
     // Handle Master Admin password update
+    $masterPass = getenv('ADMIN_MASTER_PASSWORD') ?: 'admin123';
     if (strtolower($className) === 'admin') {
-        if ($currentPassword !== 'admin123') {
+        if ($currentPassword !== $masterPass) {
             echo json_encode(["success" => false, "message" => "Incorrect current master password."]);
             exit;
         }
@@ -54,7 +51,6 @@ try {
 
     if (!$matchFound) {
         echo json_encode(["success" => false, "message" => "Current password is incorrect."]);
-        $conn->close();
         exit;
     }
 
@@ -68,7 +64,6 @@ try {
     }
 
     $updateStmt->close();
-    $conn->close();
 
 } catch (Exception $e) {
     echo json_encode(["success" => false, "message" => "Server exception: " . $e->getMessage()]);
